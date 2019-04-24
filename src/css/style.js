@@ -23,7 +23,7 @@ export default (theme) => {
     },
 
     menuItem: {
-      // 幅600px未満場合
+      // 幅600px未満の場合
       '@media screen and (max-width:599px)': { display: 'none' }
     },
   });
