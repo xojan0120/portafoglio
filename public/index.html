@@ -25,13 +25,22 @@
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous"
           />
-    <title>My page</title>
+
+    <!-- firebase
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
+    -->
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth.css" />
+
+    <title>Portafoglio</title>
   </head>
   <body>
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>
     <div id="root"></div>
+    <div id="firebaseui-auth-container"></div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -41,6 +50,15 @@
 
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+    <!--
+    <script type="text/javascript">
+      const config = {
+        apiKey:            "AIzaSyA7fYCzLoHJRuU1-nZeg0XPwK8yk4gN9To",
+        authDomain:        "test-bbc2f.firebaseapp.com",
+      };
+      firebase.initializeApp(config);
+    </script>
     -->
   </body>
 </html>

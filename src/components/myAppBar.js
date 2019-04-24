@@ -30,9 +30,17 @@ const MyAppBar = (props) => {
         <Button className={c.menuItem} color="inherit" component={Link} to="/new">New</Button>
         <Button className={c.menuItem} color="inherit" component={Link} to="/random">Random</Button>
 
-        <Button className={c.login} color="inherit" component={Link} to="/login" >
-          <AccountCircle />Login
+        {/*
+        <Button className={c.login} color="inherit" component={Link} to="/signin" >
+          <AccountCircle />Sign in
         </Button>
+        */}
+
+        {/*
+        <Button className={c.login} color="inherit" onClick={()=>firebase.login()} >
+          <AccountCircle />Sign in
+        </Button>
+        */}
       </Toolbar>
 
       <div>
