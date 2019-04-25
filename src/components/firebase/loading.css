@@ -1,0 +1,31 @@
+.firebaseui-hidden {
+  display: block;
+}
+
+.mdl-card .firebaseui-callback-indicator-container {
+}
+
+.firebaseui-info-bar {
+  margin-top: 20px;
+}
+
+.mdl-shadow--2dp {
+  /* box-shadow: none; */
+}
+
+.mdl-card.firebaseui-container {
+  background-image: url('./loading.gif');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+
+.mdl-progress {
+  display: none;
+}
+
+.mdl-card .firebaseui-callback-indicator-container::after {
+  color: black;
+  content: 'Authenticating...';
+  display: block;
+  text-align: center;
+}
