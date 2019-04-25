@@ -1,6 +1,11 @@
-import React          from 'react';
-import { Link }       from 'react-router-dom';
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(React Standard)
+// -------------------------------------------------------------------------------------------------
+import React from 'react';
 
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(MaterialUI)
+// -------------------------------------------------------------------------------------------------
 import AccountCircle  from '@material-ui/icons/AccountCircle';
 import AppBar         from '@material-ui/core/AppBar';
 import Button         from '@material-ui/core/Button';
@@ -10,13 +15,27 @@ import MenuItem       from '@material-ui/core/MenuItem';
 import Toolbar        from '@material-ui/core/Toolbar';
 import Typography     from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Avatar from '@material-ui/core/Avatar';
+import Avatar         from '@material-ui/core/Avatar';
 
-import styles         from '../css/style'
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Third Party)
+// -------------------------------------------------------------------------------------------------
+import { Link } from 'react-router-dom';
 
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
 import * as FirebaseAuth from './firebase/firebaseAuth';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Self Made)
+// -------------------------------------------------------------------------------------------------
+import styles   from '../css/style'
 import * as Cmn from '../lib/common';
 
+// ----------------------------------------------------------------------------------------
+// * Main Class
+// ----------------------------------------------------------------------------------------
 class MyAppBar extends React.Component {
   constructor(props) {
     super(props);
@@ -34,6 +53,9 @@ class MyAppBar extends React.Component {
     });
   }
 
+  // --------------------------------------------------------------------------------------
+  // * Event handlers and Related Methods
+  // --------------------------------------------------------------------------------------
   openMenu = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   }
@@ -42,6 +64,9 @@ class MyAppBar extends React.Component {
     this.setState({ anchorEl: null });
   };
 
+  // --------------------------------------------------------------------------------------
+  // Render Methods
+  // --------------------------------------------------------------------------------------
   render() {
     const c = this.props.classes;
     return (
@@ -60,8 +85,15 @@ class MyAppBar extends React.Component {
     );
   }
 };
+
+// --------------------------------------------------------------------------------------
+// Export Module
+// --------------------------------------------------------------------------------------
 export default withStyles(styles)(MyAppBar);
 
+// --------------------------------------------------------------------------------------
+// Return component functions
+// --------------------------------------------------------------------------------------
 const SiteTitle = ({c}) => {
   return (
     <Typography variant="h4" gutterBottom={true} className={c.siteTitle}>
@@ -121,7 +153,7 @@ const SignInOut = ({c, user, isLoading}) => {
       { 
         user ?
         <Button color="inherit" component={Link} to="/" onClick={()=>FirebaseAuth.signOut()} >Sign out</Button>
-          :
+        :
         <Button color="inherit" component={Link} to="/signin">Sign in</Button>
       }
       </span>
