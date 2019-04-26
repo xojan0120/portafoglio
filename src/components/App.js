@@ -16,7 +16,7 @@ import {
   BrowserRouter as Router,
   Route,
   Switch 
-}                from "react-router-dom";
+}                from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // -------------------------------------------------------------------------------------------------
@@ -28,9 +28,10 @@ import * as FirebaseAuth from './firebase/firebaseAuth';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import About    from './about';
-import MyAppBar from './myAppBar';
-import SiteList from './siteList';
+import About      from './about';
+import MyAppBar   from './myAppBar';
+import SiteList   from './siteList';
+import SiteDetail from './siteDetail';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
@@ -66,6 +67,8 @@ class App extends React.Component {
           <Route exact path="/"       render={() => this.hook(<SiteList order="new" />)} />
           <Route exact path="/about"  render={() => this.hook(<About param="123" />)} />
           <Route exact path="/signin" render={() => FirebaseAuth.uiShow()} />
+          <Route exact path="/sites/:siteId/detail" 
+                                      render={(match) => this.hook(<SiteDetail {...match}/>)} />
         </Switch>
 
         <div id="firebaseui-auth-container"></div>

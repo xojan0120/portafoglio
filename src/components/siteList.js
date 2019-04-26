@@ -5,33 +5,18 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import { unstable_Box as Box } from '@material-ui/core/Box';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-import { SyncLoader as Loader } from 'react-spinners';
+import InfiniteScroll           from 'react-infinite-scroller';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import SiteItem from './siteItem';
-import * as Api from '../lib/api';
+import SiteItem      from './siteItem';
+import * as Api      from '../lib/api';
 import { LoaderBox } from '../lib/common';
-
-const getSiteList = (self) => {
-  const promise = Api.getSiteList();
-  promise.then(res => {
-    const list = [];
-    res.data.forEach(data => {
-      list.push(<SiteItem key={data.id} {...data} />);
-    });
-    self.setState({ 
-      list: list,
-      isLoading: false
-    });
-  });
-}
 
 
 class SiteList extends React.Component {
@@ -40,15 +25,43 @@ class SiteList extends React.Component {
     this.state = {
       isLoading: true,
       list: [],
+      hasMoreItems: true,
     };
-    getSiteList(this);
+    this.getSiteList(props.order);
+  }
+
+  getSiteList = (order) => {
+    const promise = Api.getSiteList(order);
+    promise.then(res => {
+      const newList = this.state.list.concat(res.data);
+      this.setState({ 
+        list: newList,
+        isLoading: false
+      });
+    });
+  }
+
+  renderList = () => {
+    const list = [];
+    this.state.list.forEach(data => {
+      list.push(<SiteItem key={data.id} {...data} />);
+    });
+    return list;
   }
 
   render = () => {
     return (
-      <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around'}}>
-        { this.state.isLoading ?  <LoaderBox /> : this.state.list }
-      </div>
+      //<InfiniteScroll
+      //  pageStart={0}
+      //  loadMore={page => this.getSiteList(page)}
+      //  hasMore={this.state.hasMoreItems}
+      //  loader={<LoaderBox />}
+      //  threshold={10}
+      //>
+        <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around'}}>
+          {this.renderList()}
+        </div>
+      //</InfiniteScroll>
     );
   }
 }

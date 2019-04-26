@@ -4,9 +4,20 @@
 import React from 'react';
 
 // -------------------------------------------------------------------------------------------------
+// * Import Modules(MaterialUI)
+// -------------------------------------------------------------------------------------------------
+import { withStyles } from '@material-ui/core/styles';
+
+// -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
 import { SyncLoader as Loader } from 'react-spinners';
+import PropTypes                from 'prop-types';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Self Made)
+// -------------------------------------------------------------------------------------------------
+import styles from '../css/style'
 
 // ----------------------------------------------------------------------------------------
 // * Common Function
@@ -18,10 +29,18 @@ export const hide = (isLoading) => {
 // ----------------------------------------------------------------------------------------
 // * Common Component
 // ----------------------------------------------------------------------------------------
-export const LoaderBox = () => {
+const LoaderBoxWithoutStyles = (props) => {
   return (
-    <div style={{marginTop:30}}>
+    <div className={props.classes.loaderBox}>
       <Loader margin="10px" size={30} color="#36D7B7"/>
     </div>
   );
 }
+export const LoaderBox = withStyles(styles)(LoaderBoxWithoutStyles);
+
+// --------------------------------------------------------------------------------------
+// PropTypes
+// --------------------------------------------------------------------------------------
+LoaderBox.propTypes = {
+  classes: PropTypes.object.isRequired,
+};

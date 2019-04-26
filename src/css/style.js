@@ -5,7 +5,6 @@ export default (theme) => {
     },
 
     siteTitleLink: {
-      textDecoration: 'none',
       marginRight:    20,
       color:          'white',
       '&:hover': {
@@ -49,10 +48,18 @@ export default (theme) => {
     card: {
       margin: 15,
       flexBasis: 345, // flexbox内要素の幅
+      '&:hover': {
+        textDecoration: 'none',
+      },
     },
 
     media: {
       height: 200,
+    },
+
+    loaderBox: {
+      marginTop: 30,
+      textAlign: "center",
     },
   });
 };
