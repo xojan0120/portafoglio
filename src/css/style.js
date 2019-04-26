@@ -45,5 +45,14 @@ export default (theme) => {
     menuIconForSm: {
       marginLeft: 10,
     },
+
+    card: {
+      margin: 15,
+      flexBasis: 345, // flexbox内要素の幅
+    },
+
+    media: {
+      height: 200,
+    },
   });
 };

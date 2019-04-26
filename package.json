@@ -5,16 +5,21 @@
   "dependencies": {
     "@material-ui/core": "latest",
     "@material-ui/icons": "^3.0.2",
+    "@material-ui/styles": "^3.0.0-alpha.10",
+    "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
     "firebase": "^5.10.0",
     "firebaseui": "^3.5.2",
+    "material-ui": "^1.0.0-beta.47",
     "node-sass": "^4.11.0",
     "prop-types": "latest",
     "react": "latest",
     "react-bootstrap": "^1.0.0-beta.8",
     "react-dom": "latest",
+    "react-infinite-scroller": "^1.2.4",
     "react-router-dom": "^5.0.0",
-    "react-scripts": "latest"
+    "react-scripts": "latest",
+    "react-spinners": "^0.5.4"
   },
   "scripts": {
     "start": "react-scripts start",

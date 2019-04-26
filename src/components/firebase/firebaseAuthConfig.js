@@ -22,7 +22,7 @@ export default (successCallback, failureCallback) => {
       //uiShown: () => document.getElementById('loader').style.display = 'none',
     },
     signInFlow: 'redirect',
-    signInSuccessUrl: '/about',
+    signInSuccessUrl: '/',
     signInOptions: [
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       //firebase.auth.FacebookAuthProvider.PROVIDER_ID,

@@ -30,6 +30,7 @@ import * as FirebaseAuth from './firebase/firebaseAuth';
 // -------------------------------------------------------------------------------------------------
 import About    from './about';
 import MyAppBar from './myAppBar';
+import SiteList from './siteList';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
@@ -62,7 +63,7 @@ class App extends React.Component {
         <MyAppBar />
 
         <Switch>
-          <Route exact path="/"       render={() => this.hook(<div>top</div>)} />
+          <Route exact path="/"       render={() => this.hook(<SiteList order="new" />)} />
           <Route exact path="/about"  render={() => this.hook(<About param="123" />)} />
           <Route exact path="/signin" render={() => FirebaseAuth.uiShow()} />
         </Switch>

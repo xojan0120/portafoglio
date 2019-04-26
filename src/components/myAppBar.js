@@ -20,7 +20,8 @@ import Avatar         from '@material-ui/core/Avatar';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { Link }  from 'react-router-dom';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Firebase)
@@ -87,9 +88,17 @@ class MyAppBar extends React.Component {
 };
 
 // --------------------------------------------------------------------------------------
+// PropTypes
+// --------------------------------------------------------------------------------------
+MyAppBar.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+// --------------------------------------------------------------------------------------
 // Export Module
 // --------------------------------------------------------------------------------------
 export default withStyles(styles)(MyAppBar);
+
 
 // --------------------------------------------------------------------------------------
 // Return component functions
@@ -144,7 +153,7 @@ const SignInOut = ({c, user, isLoading}) => {
     <div className={c.login} style={Cmn.hide(isLoading)}>
       {
         user ?
-        <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar}  />
+        <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar} />
         :
         <AccountCircle className={c.avatarIcon} />
       }
