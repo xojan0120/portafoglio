@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(React Standard)
 // -------------------------------------------------------------------------------------------------
-import React from 'react';
+import React, {useCallback} from 'react';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
@@ -13,6 +13,7 @@ import { withStyles } from '@material-ui/core/styles';
 // -------------------------------------------------------------------------------------------------
 import { SyncLoader as Loader } from 'react-spinners';
 import PropTypes                from 'prop-types';
+import {useDropzone}            from 'react-dropzone'
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -38,9 +39,39 @@ const LoaderBoxWithoutStyles = (props) => {
 }
 export const LoaderBox = withStyles(styles)(LoaderBoxWithoutStyles);
 
+export const Dropzone = ({caption, component, callBack}) => {
+  const Component = component;
+
+  const onDrop = useCallback(acceptedFiles => {
+    const reader = new FileReader();
+    reader.readAsDataURL(acceptedFiles[0]);
+    reader.onabort = () => console.log('file reading was aborted')
+    reader.onerror = () => console.log('file reading has failed')
+    reader.onload  = () => {
+      const data = reader.result
+      callBack(data);
+    }
+  }, [])
+  const {getRootProps, getInputProps, open, isDragActive} = useDropzone({onDrop})
+
+  return (
+    <div {...getRootProps()} style={{height:"100%"}}>
+      <input {...getInputProps()} />
+      { caption ? caption : null }
+      { component ? <Component onClick={open}/> : null }
+    </div>
+  )
+}
+
 // --------------------------------------------------------------------------------------
 // PropTypes
 // --------------------------------------------------------------------------------------
 LoaderBoxWithoutStyles.propTypes = {
   classes: PropTypes.object.isRequired,
+};
+
+Dropzone.propTypes = {
+  component: PropTypes.func,
+  caption:   PropTypes.string,
+  callBack:  PropTypes.func,
 };

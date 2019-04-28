@@ -20,36 +20,36 @@ import SiteItem      from './siteItem';
 import * as Api      from '../lib/api';
 import { LoaderBox } from '../lib/common';
 
+// ----------------------------------------------------------------------------------------
+// * Main Class
+// ----------------------------------------------------------------------------------------
 class SiteList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       hasMoreItems: true,
-      page: null,
+      page: this.getPage(this.props.location.pathname),
     };
-
-    this.initialLoad();
   }
 
-  initialLoad = () => {
-    console.log("run initialLoad!")
-    let page = parseInt(this.props.match.params.page);
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    console.log("run componentDidMount!")
+    this.getSiteList(this.state.page);
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
+  getPage = (path) => {
+    let page = parseInt(pathParse(path).base);
     if (Number.isNaN(page)) {
       page = 1;
     }
-    this.getSiteList(page);
-  }
-
-  getNextPage = (currentPath) => {
-    let nextPage = 0;
-    const currentPageNum = parseInt(pathParse(currentPath).base);
-    if (Number.isNaN(currentPageNum)) {
-      nextPage = 2;
-    } else {
-      nextPage = currentPageNum + 1;
-    }
-    return nextPage;
+    return page;
   }
 
   getSiteList = (page) => {
@@ -63,18 +63,21 @@ class SiteList extends React.Component {
         });
 
         this.props.history.push(`/sites/${this.props.order}/${page}`);
+        this.setState({ page: page });
       } else {
         this.setState({ hasMoreItems: false });
       }
     });
   }
 
-  getLoadMore = () => {
+  getLoadMore = (page) => {
     console.log("run getLoadMore!");
-    const nextPage = this.getNextPage(window.location.pathname);
-    this.getSiteList(nextPage);
+    this.getSiteList(page + 1);
   }
 
+  // --------------------------------------------------------------------------------------
+  // Render Methods
+  // --------------------------------------------------------------------------------------
   renderList = () => {
     const list = [];
     this.state.list.forEach(data => {
@@ -87,7 +90,7 @@ class SiteList extends React.Component {
     return (
       <InfiniteScroll
         initialLoad={false}
-        loadMore={this.getLoadMore}
+        loadMore={()=>this.getLoadMore(this.state.page)}
         hasMore={this.state.hasMoreItems} // hasMoreがtrueになるとデータを追加ロードするためのscrollイベントが除去される。
         loader={<LoaderBox key={0}/>} // keyが必要。公式ドキュメントにも記載有り。https://github.com/CassetteRocks/react-infinite-scroller#props
         threshold={10}
@@ -100,4 +103,7 @@ class SiteList extends React.Component {
   }
 }
 
+// --------------------------------------------------------------------------------------
+// Export Module
+// --------------------------------------------------------------------------------------
 export default withRouter(SiteList);

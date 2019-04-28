@@ -33,7 +33,7 @@ const SiteItem = (props) => {
     <Card className={c.card} component={Link} to={`/sites/${props.id}/detail`}>
       <CardActionArea>
         <CardMedia
-          className={c.media}
+          className={c.siteListMedia}
           image="https://material-ui.com/static/images/cards/contemplative-reptile.jpg"
           title={props.name}
         />
