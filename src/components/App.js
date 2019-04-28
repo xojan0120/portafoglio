@@ -15,7 +15,8 @@ import withRoot       from '../withRoot';
 import { 
   BrowserRouter as Router,
   Route,
-  Switch 
+  Switch,
+  Redirect,
 }                from 'react-router-dom';
 import PropTypes from 'prop-types';
 
@@ -32,6 +33,7 @@ import About      from './about';
 import MyAppBar   from './myAppBar';
 import SiteList   from './siteList';
 import SiteDetail from './siteDetail';
+import NotFound   from './notFound';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
@@ -64,11 +66,25 @@ class App extends React.Component {
         <MyAppBar />
 
         <Switch>
-          <Route exact path="/"       render={() => this.hook(<SiteList order="new" />)} />
-          <Route exact path="/about"  render={() => this.hook(<About param="123" />)} />
-          <Route exact path="/signin" render={() => FirebaseAuth.uiShow()} />
+          <Route exact path="/"
+            render={() => <Redirect to="/sites/new" />} />
+
+          <Route exact path={["/sites/new", "/sites/new/:page"]}
+            render={(match) => this.hook(<SiteList order="new" {...match} />)} />
+
+          <Route exact path={["/sites/random", "/sites/new/:random"]}
+            render={() => this.hook(<SiteList order="random" />)} />
+
+          <Route exact path="/about"
+            render={() => this.hook(<About param="123" />)} />
+
+          <Route exact path="/signin"
+            render={() => FirebaseAuth.uiShow()} />
+
           <Route exact path="/sites/:siteId/detail" 
-                                      render={(match) => this.hook(<SiteDetail {...match}/>)} />
+            render={(match) => this.hook(<SiteDetail {...match} />)} />
+
+          <Route component={NotFound} />
         </Switch>
 
         <div id="firebaseui-auth-container"></div>

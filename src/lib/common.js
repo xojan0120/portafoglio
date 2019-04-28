@@ -22,9 +22,9 @@ import styles from '../css/style'
 // ----------------------------------------------------------------------------------------
 // * Common Function
 // ----------------------------------------------------------------------------------------
-export const hide = (isLoading) => {
-  return isLoading ? {visibility: "hidden"} : {visibility: "visible"}
-}
+//export const hide = (isLoading) => {
+//  return isLoading ? {visibility: "hidden"} : {visibility: "visible"}
+//}
 
 // ----------------------------------------------------------------------------------------
 // * Common Component
@@ -41,6 +41,6 @@ export const LoaderBox = withStyles(styles)(LoaderBoxWithoutStyles);
 // --------------------------------------------------------------------------------------
 // PropTypes
 // --------------------------------------------------------------------------------------
-LoaderBox.propTypes = {
+LoaderBoxWithoutStyles.propTypes = {
   classes: PropTypes.object.isRequired,
 };

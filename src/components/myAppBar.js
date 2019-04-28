@@ -32,7 +32,6 @@ import * as FirebaseAuth from './firebase/firebaseAuth';
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
 import styles   from '../css/style'
-import * as Cmn from '../lib/common';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -126,8 +125,8 @@ const MenuListForLg = ({c}) => {
   return (
     <div className={c.hideSm}>
       <Button color="inherit" component={Link} to="/about">About</Button>
-      <Button color="inherit" component={Link} to="/new">New</Button>
-      <Button color="inherit" component={Link} to="/random">Random</Button>
+      <Button color="inherit" component={Link} to="/sites/new">New</Button>
+      <Button color="inherit" component={Link} to="/sites/random">Random</Button>
     </div>
   );
 }
@@ -135,9 +134,9 @@ const MenuListForLg = ({c}) => {
 const MenuListForSm = ({user, anchorEl, closeMenu}) => {
   return (
     <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={()=>closeMenu()} >
-      <MenuItem component={Link} to="/about"  onClick={()=>closeMenu()}>About</MenuItem>
-      <MenuItem component={Link} to="/new"    onClick={()=>closeMenu()}>New</MenuItem>
-      <MenuItem component={Link} to="/random" onClick={()=>closeMenu()}>Random</MenuItem>
+      <MenuItem component={Link} to="/about"        onClick={()=>closeMenu()}>About</MenuItem>
+      <MenuItem component={Link} to="/sites/new"    onClick={()=>closeMenu()}>New</MenuItem>
+      <MenuItem component={Link} to="/sites/random" onClick={()=>closeMenu()}>Random</MenuItem>
       {
         user ?
         <MenuItem component={Link} to="/" onClick={()=>{FirebaseAuth.signOut();closeMenu()}}>Sign out</MenuItem>
@@ -150,7 +149,7 @@ const MenuListForSm = ({user, anchorEl, closeMenu}) => {
 
 const SignInOut = ({c, user, isLoading}) => {
   return (
-    <div className={c.login} style={Cmn.hide(isLoading)}>
+    <div className={c.login} style={{visibility: isLoading ? "hidden" : "visible"}}>
       {
         user ?
         <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar} />
