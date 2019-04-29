@@ -12,15 +12,21 @@ import Grid from '@material-ui/core/Grid';
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
 import SiteScreenshot from './siteScreenshot';
-import SiteReaction from './siteReaction';
-import SiteInfo from './siteInfo';
+import SiteReaction   from './siteReaction';
+import SiteInfo       from './siteInfo';
 
+// ----------------------------------------------------------------------------------------
+// * Main Class
+// ----------------------------------------------------------------------------------------
 class SiteDetail extends React.Component {
   constructor(props) {
     super(props);
     //site id {this.props.match.params.siteId}
   }
 
+  // --------------------------------------------------------------------------------------
+  // Render Methods
+  // --------------------------------------------------------------------------------------
   render() {
     return (
       <Grid container spacing={24} style={{margin: 10}}>
@@ -38,4 +44,7 @@ class SiteDetail extends React.Component {
   }
 }
 
+// --------------------------------------------------------------------------------------
+// Export Module
+// --------------------------------------------------------------------------------------
 export default SiteDetail;

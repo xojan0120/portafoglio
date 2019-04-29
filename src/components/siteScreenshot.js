@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(React Standard)
 // -------------------------------------------------------------------------------------------------
-import React, {useCallback} from 'react'
+import React from 'react'
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
@@ -18,7 +18,7 @@ import Typography        from '@material-ui/core/Typography';
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
 import PropTypes     from 'prop-types';
-import {useDropzone} from 'react-dropzone'
+import classNames    from 'classnames';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -32,18 +32,28 @@ import { Dropzone } from '../lib/common';
 class SiteScreenshot extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { screenshot: false };
   }
 
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
+  upload = (data) => {
+    this.setState({ screenshot: true });
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Render Methods
+  // --------------------------------------------------------------------------------------
   render() {
     const c = this.props.classes;
-    const screenshot = false;
     return (
-      <Card className={c.siteScreenshotCard}>
+      <Card className={siteScreenshotCardClass(c, this.state.screenshot)} >
         { 
-          screenshot ?
+          this.state.screenshot ?
           <Screenshot c={c} />
           :
-          <Dropzone component={()=><NoImage c={c} />} callBack={(data)=>console.log(data)} />
+          <Dropzone component={()=><NoImage c={c} />} callBack={(data)=>this.upload(data)} />
         }
       </Card>
     );
@@ -65,7 +75,7 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c}) => {
+const Screenshot = ({c, imageURL}) => {
   return (
     <React.Fragment>
       <CardMedia
@@ -94,4 +104,11 @@ const NoImage = ({c}) => {
       </Typography>
     </div>
   );
+}
+
+// --------------------------------------------------------------------------------------
+// Return css class names functions
+// --------------------------------------------------------------------------------------
+const siteScreenshotCardClass = (c, screenshot) => {
+  return screenshot ? c.siteScreenshotCard : classNames(c.siteScreenshotCard, c.pointer)
 }

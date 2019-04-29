@@ -52,7 +52,7 @@ export const Dropzone = ({caption, component, callBack}) => {
       callBack(data);
     }
   }, [])
-  const {getRootProps, getInputProps, open, isDragActive} = useDropzone({onDrop})
+  const {getRootProps, getInputProps, open/*, isDragActive*/} = useDropzone({onDrop})
 
   return (
     <div {...getRootProps()} style={{height:"100%"}}>
@@ -75,3 +75,12 @@ Dropzone.propTypes = {
   caption:   PropTypes.string,
   callBack:  PropTypes.func,
 };
+
+// ----------------------------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------------------------
+export const cmnValidOwnerLength       = parseInt(process.env.REACT_APP_VALID_OWNER_LENGTH);
+export const cmnValidSiteNameLength    = parseInt(process.env.REACT_APP_VALID_SITE_NAME_LENGTH);
+export const cmnValidSiteUrlLength     = parseInt(process.env.REACT_APP_VALID_SITE_URL_LENGTH);
+export const cmnValidCreationPeriodMin = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MIN);
+export const cmnValidCreationPeriodMax = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MAX);

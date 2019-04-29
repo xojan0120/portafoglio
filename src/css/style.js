@@ -69,6 +69,10 @@ export default (theme) => {
       '@media screen and (max-width:599px)': { height: '30vh' },
     },
 
+    pointer: {
+      cursor: "pointer",
+    },
+
     siteScreenshotMedia: {
       height: '95%',
     },
@@ -80,11 +84,38 @@ export default (theme) => {
     },
 
     noImage: {
-      textAlign: "center",
+      textAlign: 'center',
     },
 
     noImageIcon: {
       fontSize: 500,
+    },
+
+    reactionButton: {
+      fontSize: 'large',
+      marginRight: 15,
+    },
+
+    reactionIcon: {
+      marginRight: 5,
+      marginBottom: 5,
+    },
+
+    reactionView: {
+      fontSize: 'large',
+    },
+
+    siteInfoForm: {
+      fontSize: 30,
+    },
+
+    siteInfoIcon: {
+      fontSize: 50,
+      marginRight: 10,
+    },
+
+    siteInfoPeriodForm: {
+      width: 90,
     },
 
   });
