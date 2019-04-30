@@ -37,7 +37,7 @@ class SiteList extends React.Component {
   // * Lifecycle Methods
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
-    console.log("run componentDidMount!")
+    console.log("run componentDidMount!");
     this.getSiteList(this.state.page);
   }
 

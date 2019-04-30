@@ -12,6 +12,7 @@ import OwnerIcon      from '@material-ui/icons/AccountCircle';
 import SiteIcon       from '@material-ui/icons/WebAsset';
 import SiteUrlIcon    from '@material-ui/icons/Link';
 import PeriodIcon     from '@material-ui/icons/AccessTime';
+import SkillIcon      from '@material-ui/icons/Build';
 import Grid           from '@material-ui/core/Grid';
 import MenuItem       from '@material-ui/core/MenuItem';
 
@@ -25,14 +26,17 @@ import CreatableSelect from 'react-select/lib/Creatable';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import styles from '../css/style';
+import * as Api from '../lib/api';
+import '../css/common.scss';
 import {
   cmnValidOwnerLength,
   cmnValidSiteNameLength,
   cmnValidSiteUrlLength,
   cmnValidCreationPeriodMin,
   cmnValidCreationPeriodMax,
-}             from '../lib/common';
+  cmnValidUsedSkillsQuantity,
+  cmnValidCommentLength,
+}               from '../lib/constants';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -42,12 +46,47 @@ class SiteInfo extends React.Component {
     super(props);
 
     this.state = {
-      owner:      '',    error_owner:      false,
-      siteName:   '',    error_siteName:   false,
-      siteUrl:    '',    error_siteUrl:    false,
-      period:      0,    error_period:     false,
-      periodUnit: 'day',
+      owner:       '',    errorOwner:      false,
+      siteName:    '',    errorSiteName:   false,
+      siteUrl:     '',    errorSiteUrl:    false,
+      period:       0,    errorPeriod:     false,
+      periodUnit:  'day',
+      usedSkills:  [],    errorUsedSkills: false,
+      periodUnits: [],
+      skills:      [],
+      comment:     '',    errorComment:    false,
     };
+
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    console.log("run componentDidMount!");
+    this.getPeriodUnits();
+    this.getSkills();
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
+  getPeriodUnits = () => {
+    const promise = Api.getPeriodUnits();
+    promise.then(res => {
+      if (res.status === 200) {
+        this.setState({ periodUnits: res.data });
+      }
+    });
+  }
+
+  getSkills = () => {
+    const promise = Api.getSkills();
+    promise.then(res => {
+      if (res.status === 200) {
+        this.setState({ skills: res.data });
+      }
+    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -55,17 +94,17 @@ class SiteInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   handleOwner = (event) => {
     if (event.target.value.length <= cmnValidOwnerLength) {
-      this.setState({ owner: event.target.value, error_owner: false });
+      this.setState({ owner: event.target.value, errorOwner: false });
     } else {
-      this.setState({ error_owner: `Please use ${cmnValidOwnerLength} characters or less.` });
+      this.setState({ errorOwner: `Please use ${cmnValidOwnerLength} characters or less.` });
     }
   }
 
   handleSiteName = (event) => {
     if (event.target.value.length <= cmnValidSiteNameLength) {
-      this.setState({ siteName: event.target.value, error_siteName: false });
+      this.setState({ siteName: event.target.value, errorSiteName: false });
     } else {
-      this.setState({ error_siteName: `Please use ${cmnValidSiteNameLength} characters or less.` });
+      this.setState({ errorSiteName: `Please use ${cmnValidSiteNameLength} characters or less.` });
     }
   }
 
@@ -73,18 +112,18 @@ class SiteInfo extends React.Component {
     //const re = /(?:^|[\s　]+)((?:https?):\/\/[^\s　]+)/
 
     if (event.target.value.length <= cmnValidSiteUrlLength) {
-      this.setState({ siteUrl: event.target.value, error_siteUrl: false });
+      this.setState({ siteUrl: event.target.value, errorSiteUrl: false });
     } else {
-      this.setState({ error_siteUrl: `Please use ${cmnValidSiteUrlLength} characters or less.` });
+      this.setState({ errorSiteUrl: `Please use ${cmnValidSiteUrlLength} characters or less.` });
     }
   }
 
   handlePeriod = (event) => {
     if (event.target.value >= cmnValidCreationPeriodMin &&
       event.target.value <= cmnValidCreationPeriodMax) {
-      this.setState({ period: event.target.value, error_period: false });
+      this.setState({ period: event.target.value, errorPeriod: false });
     } else {
-      this.setState({ error_period: true });
+      this.setState({ errorPeriod: true });
     }
   }
 
@@ -93,11 +132,24 @@ class SiteInfo extends React.Component {
   }
 
   handleSkill = (newValue, actionMeta) => {
-    console.group('Value Changed');
-    console.log(newValue);
-    console.log(`action: ${actionMeta.action}`);
-    console.groupEnd();
+    if (newValue.length <= cmnValidUsedSkillsQuantity) {
+      console.group('Value Changed');
+      console.log(newValue);
+      console.log(`action: ${actionMeta.action}`);
+      console.groupEnd();
+      this.setState({ usedSkills: newValue, errorUsedSkills: false });
+    } else {
+      this.setState({ errorUsedSkills: `Please select ${cmnValidUsedSkillsQuantity} or less.` });
+    }
   };
+
+  handleComment = (event) => {
+    if (event.target.value.length <= cmnValidCommentLength) {
+      this.setState({ comment: event.target.value, errorComment: false });
+    } else {
+      this.setState({ errorOwner: `Please use ${cmnValidCommentLength} characters or less.` });
+    }
+  }
 
   // --------------------------------------------------------------------------------------
   // Render Methods
@@ -109,19 +161,19 @@ class SiteInfo extends React.Component {
         <OwnerField 
           c={c}
           value={this.state.owner}
-          error={this.state.error_owner}
+          error={this.state.errorOwner}
           onChange={(event)=>this.handleOwner(event)}
         />
         <SiteNameField 
           c={c}
           value={this.state.siteName}
-          error={this.state.error_siteName}
+          error={this.state.errorSiteName}
           onChange={(event)=>this.handleSiteName(event)}
         />
         <SiteUrlField
           c={c}
           value={this.state.siteUrl}
-          error={this.state.error_siteUrl}
+          error={this.state.errorSiteUrl}
           onChange={(event)=>this.handleSiteUrl(event)}
         />
         <Grid container alignItems="flex-end">
@@ -129,7 +181,7 @@ class SiteInfo extends React.Component {
             <PeriodField
               c={c}
               value={this.state.period}
-              error={this.state.error_period}
+              error={this.state.errorPeriod}
               onChange={(event)=>this.handlePeriod(event)}
             />
           </Grid>
@@ -138,17 +190,58 @@ class SiteInfo extends React.Component {
               c={c}
               value={this.state.periodUnit}
               onChange={(event)=>this.handlePeriodUnit(event)}
+              units={this.state.periodUnits}
             />
           </Grid>
         </Grid>
         <SkillField
           c={c}
+          value={this.state.usedSkills}
+          error={this.state.errorUsedSkills}
           onChange={(newValue, actionMeta)=>this.handleSkill(newValue, actionMeta)}
+          skills={this.state.skills}
+        />
+        <CommentField 
+          c={c}
+          value={this.state.comment}
+          error={this.state.errorComment}
+          onChange={(event)=>this.handleComment(event)}
         />
       </form>
     );
   }
 }
+
+// -------------------------------------------------------------------------------------------------
+// Styles
+// -------------------------------------------------------------------------------------------------
+const styles = theme => ({
+  form: {
+    fontSize: 30,
+  },
+
+  icon: {
+    fontSize: 50,
+    marginRight: 10,
+  },
+
+  periodForm: {
+    width: 90,
+  },
+
+  usedSkillsLabel: {
+    color: 'rgba(0, 0, 0, 0.54)',
+    padding: 0,
+    fontSize: '0.8rem',
+    lineHeight: 1,
+    marginTop: 15,
+    marginBottom: 15,
+  },
+
+  usedSkillsForm: {
+    width: 350,
+  },
+});
 
 // --------------------------------------------------------------------------------------
 // PropTypes
@@ -169,7 +262,7 @@ const OwnerField = ({c, value, error, onChange}) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <OwnerIcon className={c.siteInfoIcon}/>
+        <OwnerIcon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
@@ -177,12 +270,12 @@ const OwnerField = ({c, value, error, onChange}) => {
           id="owner"
           label="Owner"
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.siteInfoForm }}
+          InputProps={{ className: c.form }}
           className={c.textField}
           value={value}
           onChange={onChange}
           margin="normal"
-          placeholder="Owner nickname"
+          placeholder="Your nickname"
           error={!!error}
           helperText={error}
         />
@@ -195,7 +288,7 @@ const SiteNameField = ({c, value, error, onChange}) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <SiteIcon className={c.siteInfoIcon}/>
+        <SiteIcon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
@@ -203,7 +296,7 @@ const SiteNameField = ({c, value, error, onChange}) => {
           id="siteName"
           label="Site name"
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.siteInfoForm }}
+          InputProps={{ className: c.form }}
           className={c.textField}
           value={value}
           onChange={onChange}
@@ -221,15 +314,15 @@ const SiteUrlField = ({c, value, error, onChange}) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <SiteUrlIcon className={c.siteInfoIcon}/>
+        <SiteUrlIcon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
           required
           id="siteUrl"
-          label="Site Url"
+          label="Site URL"
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.siteInfoForm }}
+          InputProps={{ className: c.form }}
           className={c.textField}
           value={value}
           onChange={onChange}
@@ -247,15 +340,15 @@ const PeriodField = ({c, value, error, onChange}) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <PeriodIcon className={c.siteInfoIcon}/>
+        <PeriodIcon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
           id="period"
           label="Creation period"
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.siteInfoForm }}
-          className={classNames(c.textField, c.siteInfoPeriodForm)}
+          InputProps={{ className: c.form }}
+          className={classNames(c.textField, c.periodForm)}
           value={value}
           onChange={onChange}
           margin="normal"
@@ -268,14 +361,7 @@ const PeriodField = ({c, value, error, onChange}) => {
   );
 }
 
-const PeriodUnitField = ({c, value, error, onChange}) => {
-  const units = [
-    { value: 'hour',  label: 'hour'  },
-    { value: 'day',   label: 'day'   },
-    { value: 'week',  label: 'week'  },
-    { value: 'month', label: 'month' },
-    { value: 'year',  label: 'year'  },
-  ]
+const PeriodUnitField = ({c, value, error, onChange, units}) => {
   return (
     <TextField
       id="periodUnit"
@@ -283,7 +369,7 @@ const PeriodUnitField = ({c, value, error, onChange}) => {
       className={c.textField}
       value={value}
       onChange={onChange}
-      InputProps={{ className: c.siteInfoForm }}
+      InputProps={{ className: c.form }}
       SelectProps={{
         MenuProps: {
           className: c.menu,
@@ -300,18 +386,50 @@ const PeriodUnitField = ({c, value, error, onChange}) => {
   );
 }
 
-const SkillField = ({c, onChange}) => {
-  const colourOptions = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-  ];
+const SkillField = ({c, value, error, onChange, skills}) => {
   return (
-    <CreatableSelect
-      isMulti
-      onChange={onChange}
-      options={colourOptions}
-    />
+    <Grid container alignItems="center">
+      <Grid item>
+        <SkillIcon className={c.icon}/>
+      </Grid>
+      <Grid item>
+        <div className={classNames(c.usedSkillsLabel, error ? "warning" : "")}>Used Skills</div>
+        <div className={c.usedSkillsForm}>
+          <CreatableSelect
+            isMulti
+            value={value}
+            onChange={onChange}
+            options={skills}
+          />
+        </div>
+        <div className={classNames(c.usedSkillsLabel,"warning")}>{error}</div>
+      </Grid>
+    </Grid>
   );
 }
 
+const CommentField = ({c, value, error, onChange}) => {
+  return (
+    <Grid container alignItems="center">
+      <Grid item>
+        <OwnerIcon className={c.icon}/>
+      </Grid>
+      <Grid item>
+        <TextField
+          required
+          id="comment"
+          label="Comment"
+          InputLabelProps={{ shrink: true }}
+          InputProps={{ className: c.form }}
+          className={c.textField}
+          value={value}
+          onChange={onChange}
+          margin="normal"
+          placeholder="Your comment"
+          error={!!error}
+          helperText={error}
+        />
+      </Grid>
+    </Grid>
+  );
+}

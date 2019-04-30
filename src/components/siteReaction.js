@@ -8,6 +8,7 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 import Button         from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
+import Typography     from '@material-ui/core/Typography';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -24,7 +25,7 @@ import {
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import styles from '../css/style';
+import * as Api from '../lib/api';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -32,6 +33,45 @@ import styles from '../css/style';
 class SiteReaction extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      reactions: {
+        good: 0,
+      },
+      view: 0,
+    }
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    console.log("run componentDidMount!");
+    this.getReactionsCount();
+    this.getViewCount();
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
+  getReactionsCount = () => {
+    const promise = Api.getReactionsCount();
+    promise.then(res => {
+      if (res.status === 200) {
+        console.log(res.data);
+        this.setState({ reactions: res.data });
+      }
+    });
+  }
+
+  getViewCount = () => {
+    const promise = Api.getViewCount();
+    promise.then(res => {
+      if (res.status === 200) {
+        console.log(res.data);
+        this.setState({ view: res.data });
+      }
+    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -42,7 +82,7 @@ class SiteReaction extends React.Component {
     return (
       <div>
         <Button variant="contained" color="default" className={c.reactionButton}>
-          <GoodIcon className={c.reactionIcon} />100
+          <GoodIcon className={c.reactionIcon} />{this.state.reactions.good}
         </Button>
         {/*
         <Button variant="contained" color="default" className={c.reactionButton}>
@@ -55,13 +95,41 @@ class SiteReaction extends React.Component {
           FUNNY<FunnyIcon className={c.reactionIcon} />
         </Button>
         */}
-        <span className={c.reactionView}>
-          <ViewIcon /> 100
+        <span>
+          <ViewIcon className={c.viewIcon} />
+          <Typography inline variant="button" className={c.viewCount}>
+            {this.state.view}
+          </Typography>
         </span>
       </div>
     );
   }
 }
+
+// -------------------------------------------------------------------------------------------------
+// Styles
+// -------------------------------------------------------------------------------------------------
+const styles = theme => ({
+  reactionButton: {
+    fontSize: 'large',
+    marginRight: 15,
+  },
+
+  reactionIcon: {
+    marginRight: 5,
+    marginBottom: 5,
+  },
+
+  viewIcon: {
+    fontSize: 24,
+    marginRight: 5,
+  },
+
+  viewCount: {
+    fontSize: 18,
+    verticalAlign: 'middle',
+  },
+});
 
 // --------------------------------------------------------------------------------------
 // PropTypes

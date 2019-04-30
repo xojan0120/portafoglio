@@ -91,31 +91,8 @@ export default (theme) => {
       fontSize: 500,
     },
 
-    reactionButton: {
-      fontSize: 'large',
-      marginRight: 15,
-    },
-
-    reactionIcon: {
-      marginRight: 5,
-      marginBottom: 5,
-    },
-
-    reactionView: {
-      fontSize: 'large',
-    },
-
-    siteInfoForm: {
-      fontSize: 30,
-    },
-
-    siteInfoIcon: {
-      fontSize: 50,
-      marginRight: 10,
-    },
-
-    siteInfoPeriodForm: {
-      width: 90,
+    warning: {
+      color: 'red',
     },
 
   });

@@ -38,6 +38,9 @@ const LoaderBoxWithoutStyles = (props) => {
   );
 }
 export const LoaderBox = withStyles(styles)(LoaderBoxWithoutStyles);
+LoaderBoxWithoutStyles.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
 
 export const Dropzone = ({caption, component, callBack}) => {
   const Component = component;
@@ -62,25 +65,8 @@ export const Dropzone = ({caption, component, callBack}) => {
     </div>
   )
 }
-
-// --------------------------------------------------------------------------------------
-// PropTypes
-// --------------------------------------------------------------------------------------
-LoaderBoxWithoutStyles.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
 Dropzone.propTypes = {
   component: PropTypes.func,
   caption:   PropTypes.string,
   callBack:  PropTypes.func,
 };
-
-// ----------------------------------------------------------------------------------------
-// Constants
-// ----------------------------------------------------------------------------------------
-export const cmnValidOwnerLength       = parseInt(process.env.REACT_APP_VALID_OWNER_LENGTH);
-export const cmnValidSiteNameLength    = parseInt(process.env.REACT_APP_VALID_SITE_NAME_LENGTH);
-export const cmnValidSiteUrlLength     = parseInt(process.env.REACT_APP_VALID_SITE_URL_LENGTH);
-export const cmnValidCreationPeriodMin = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MIN);
-export const cmnValidCreationPeriodMax = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MAX);
