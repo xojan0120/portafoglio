@@ -15,6 +15,9 @@ import PeriodIcon     from '@material-ui/icons/AccessTime';
 import SkillIcon      from '@material-ui/icons/Build';
 import Grid           from '@material-ui/core/Grid';
 import MenuItem       from '@material-ui/core/MenuItem';
+import CommentIcon    from '@material-ui/icons/ModeComment';
+import UpdateAtIcon   from '@material-ui/icons/CalendarToday';
+import Paper          from '@material-ui/core/Paper';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -46,15 +49,16 @@ class SiteInfo extends React.Component {
     super(props);
 
     this.state = {
-      owner:       '',    errorOwner:      false,
-      siteName:    '',    errorSiteName:   false,
-      siteUrl:     '',    errorSiteUrl:    false,
-      period:       0,    errorPeriod:     false,
+      owner:       '',          errorOwner:      false,
+      siteName:    '',          errorSiteName:   false,
+      siteUrl:     '',          errorSiteUrl:    false,
+      period:       0,          errorPeriod:     false,
       periodUnit:  'day',
-      usedSkills:  [],    errorUsedSkills: false,
+      usedSkills:  [],          errorUsedSkills: false,
       periodUnits: [],
       skills:      [],
-      comment:     '',    errorComment:    false,
+      comment:     '',          errorComment:    false,
+      updateAt:    '2019/04/30',
     };
 
   }
@@ -132,6 +136,7 @@ class SiteInfo extends React.Component {
   }
 
   handleSkill = (newValue, actionMeta) => {
+    // TODO: 入力されたスキル名の長さもチェックする(モデル側は10文字)
     if (newValue.length <= cmnValidUsedSkillsQuantity) {
       console.group('Value Changed');
       console.log(newValue);
@@ -147,7 +152,7 @@ class SiteInfo extends React.Component {
     if (event.target.value.length <= cmnValidCommentLength) {
       this.setState({ comment: event.target.value, errorComment: false });
     } else {
-      this.setState({ errorOwner: `Please use ${cmnValidCommentLength} characters or less.` });
+      this.setState({ errorComment: `Please use ${cmnValidCommentLength} characters or less.` });
     }
   }
 
@@ -157,24 +162,43 @@ class SiteInfo extends React.Component {
   render() {
     const c = this.props.classes;
     return (
+      <Paper style={{paddingLeft:20, height:"100%", width:"90%"}}>
       <form className={c.container} autoComplete="off">
-        <OwnerField 
+        <SiteInfoTextField
+          disabled={false}
+          required={true}
+          Icon={OwnerIcon}
+          id="owner"
+          label="Owner"
           c={c}
           value={this.state.owner}
-          error={this.state.errorOwner}
           onChange={(event)=>this.handleOwner(event)}
+          placeholder="Your nickname"
+          error={this.state.errorOwner}
         />
-        <SiteNameField 
+        <SiteInfoTextField
+          disabled={false}
+          required={true}
+          Icon={SiteIcon}
+          id="siteName"
+          label="Site name"
           c={c}
           value={this.state.siteName}
-          error={this.state.errorSiteName}
           onChange={(event)=>this.handleSiteName(event)}
+          placeholder="Your site name"
+          error={this.state.errorSiteName}
         />
-        <SiteUrlField
+        <SiteInfoTextField
+          disabled={false}
+          required={true}
+          Icon={SiteUrlIcon}
+          id="siteUrl"
+          label="Site URL"
           c={c}
           value={this.state.siteUrl}
-          error={this.state.errorSiteUrl}
           onChange={(event)=>this.handleSiteUrl(event)}
+          placeholder="Your site URL"
+          error={this.state.errorSiteUrl}
         />
         <Grid container alignItems="flex-end">
           <Grid item>
@@ -196,18 +220,31 @@ class SiteInfo extends React.Component {
         </Grid>
         <SkillField
           c={c}
+          disabled={true}
           value={this.state.usedSkills}
           error={this.state.errorUsedSkills}
           onChange={(newValue, actionMeta)=>this.handleSkill(newValue, actionMeta)}
           skills={this.state.skills}
         />
-        <CommentField 
+        <CommentField
+          disabled={false}
           c={c}
           value={this.state.comment}
+          onChange={(event)=>this.handleComment(event)}
           error={this.state.errorComment}
+        />
+        <SiteInfoTextField
+          disabled={true}
+          required={false}
+          Icon={UpdateAtIcon}
+          id="updateAt"
+          label="Update at"
+          c={c}
+          value={this.state.updateAt}
           onChange={(event)=>this.handleComment(event)}
         />
       </form>
+    </Paper>
     );
   }
 }
@@ -215,33 +252,53 @@ class SiteInfo extends React.Component {
 // -------------------------------------------------------------------------------------------------
 // Styles
 // -------------------------------------------------------------------------------------------------
-const styles = theme => ({
-  form: {
-    fontSize: 30,
-  },
+const styles = theme => {
+  const baseFontSize = 30;
+  const baseWidth    = 400;
+  return ({
+    form: {
+      fontSize: baseFontSize,
+      width:    baseWidth,
+    },
 
-  icon: {
-    fontSize: 50,
-    marginRight: 10,
-  },
+    icon: {
+      fontSize:    50,
+      marginRight: 10,
+    },
 
-  periodForm: {
-    width: 90,
-  },
+    periodFormLabel: {
+      width: 120,
+    },
 
-  usedSkillsLabel: {
-    color: 'rgba(0, 0, 0, 0.54)',
-    padding: 0,
-    fontSize: '0.8rem',
-    lineHeight: 1,
-    marginTop: 15,
-    marginBottom: 15,
-  },
+    periodForm: {
+      fontSize: baseFontSize,
+      width:    90,
+    },
 
-  usedSkillsForm: {
-    width: 350,
-  },
-});
+    periodUnitForm: {
+      fontSize: baseFontSize,
+    },
+
+    usedSkillsLabel: {
+      color:        'rgba(0, 0, 0, 0.54)',
+      padding:      0,
+      fontSize:     '0.8rem',
+      lineHeight:   1,
+      marginTop:    15,
+      marginBottom: 15,
+    },
+
+    usedSkillsForm: {
+      width: baseWidth,
+    },
+
+    commentForm: {
+      fontSize: 15,
+      width:    baseWidth,
+      verticalAlign: "bottom !important",
+    },
+  });
+}
 
 // --------------------------------------------------------------------------------------
 // PropTypes
@@ -258,76 +315,26 @@ export default withStyles(styles)(SiteInfo);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const OwnerField = ({c, value, error, onChange}) => {
+const SiteInfoTextField = ({
+  disabled, required, Icon, id, label, c, value, onChange, placeholder, error
+}) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <OwnerIcon className={c.icon}/>
+        <Icon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
-          required
-          id="owner"
-          label="Owner"
+          disabled={disabled}
+          required={required}
+          id={id}
+          label={label}
           InputLabelProps={{ shrink: true }}
           InputProps={{ className: c.form }}
-          className={c.textField}
           value={value}
           onChange={onChange}
           margin="normal"
-          placeholder="Your nickname"
-          error={!!error}
-          helperText={error}
-        />
-      </Grid>
-    </Grid>
-  );
-}
-
-const SiteNameField = ({c, value, error, onChange}) => {
-  return (
-    <Grid container alignItems="center">
-      <Grid item>
-        <SiteIcon className={c.icon}/>
-      </Grid>
-      <Grid item>
-        <TextField
-          required
-          id="siteName"
-          label="Site name"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.form }}
-          className={c.textField}
-          value={value}
-          onChange={onChange}
-          margin="normal"
-          placeholder="Your site name"
-          error={!!error}
-          helperText={error}
-        />
-      </Grid>
-    </Grid>
-  );
-}
-
-const SiteUrlField = ({c, value, error, onChange}) => {
-  return (
-    <Grid container alignItems="center">
-      <Grid item>
-        <SiteUrlIcon className={c.icon}/>
-      </Grid>
-      <Grid item>
-        <TextField
-          required
-          id="siteUrl"
-          label="Site URL"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.form }}
-          className={c.textField}
-          value={value}
-          onChange={onChange}
-          margin="normal"
-          placeholder="Your site URL"
+          placeholder={placeholder}
           error={!!error}
           helperText={error}
         />
@@ -346,9 +353,8 @@ const PeriodField = ({c, value, error, onChange}) => {
         <TextField
           id="period"
           label="Creation period"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.form }}
-          className={classNames(c.textField, c.periodForm)}
+          InputLabelProps={{ shrink: true, className: c.periodFormLabel }}
+          InputProps={{ className: c.periodForm }}
           value={value}
           onChange={onChange}
           margin="normal"
@@ -366,15 +372,9 @@ const PeriodUnitField = ({c, value, error, onChange, units}) => {
     <TextField
       id="periodUnit"
       select
-      className={c.textField}
       value={value}
       onChange={onChange}
-      InputProps={{ className: c.form }}
-      SelectProps={{
-        MenuProps: {
-          className: c.menu,
-        },
-      }}
+      InputProps={{ className: c.periodUnitForm }}
       margin="normal"
     >
       {units.map(option => (
@@ -387,6 +387,21 @@ const PeriodUnitField = ({c, value, error, onChange, units}) => {
 }
 
 const SkillField = ({c, value, error, onChange, skills}) => {
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: "none",
+      borderTop:       "none" ,
+      borderRight:     "none",
+      borderLeft:      "none",
+      borderBottom:    "1px solid black",
+      borderRadius:    0,
+    }),
+    indicatorSeparator: (provided, state) => ({
+      ...provided,
+      backgroundColor: "none",
+    }),
+  }
   return (
     <Grid container alignItems="center">
       <Grid item>
@@ -396,6 +411,7 @@ const SkillField = ({c, value, error, onChange, skills}) => {
         <div className={classNames(c.usedSkillsLabel, error ? "warning" : "")}>Used Skills</div>
         <div className={c.usedSkillsForm}>
           <CreatableSelect
+            styles={customStyles}
             isMulti
             value={value}
             onChange={onChange}
@@ -408,26 +424,27 @@ const SkillField = ({c, value, error, onChange, skills}) => {
   );
 }
 
-const CommentField = ({c, value, error, onChange}) => {
+const CommentField = ({ disabled, c, value, onChange, error }) => {
   return (
     <Grid container alignItems="center">
       <Grid item>
-        <OwnerIcon className={c.icon}/>
+        <CommentIcon className={c.icon}/>
       </Grid>
       <Grid item>
         <TextField
-          required
+          disabled={disabled}
           id="comment"
           label="Comment"
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.form }}
-          className={c.textField}
+          InputProps={{ className: c.commentForm }}
           value={value}
           onChange={onChange}
           margin="normal"
           placeholder="Your comment"
           error={!!error}
           helperText={error}
+          multiline={true}
+          rows={6}
         />
       </Grid>
     </Grid>

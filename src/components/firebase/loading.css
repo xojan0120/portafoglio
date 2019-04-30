@@ -2,9 +2,6 @@
   display: block;
 }
 
-.mdl-card .firebaseui-callback-indicator-container {
-}
-
 .firebaseui-info-bar {
   margin-top: 20px;
 }
@@ -13,19 +10,21 @@
   /* box-shadow: none; */
 }
 
-.mdl-card.firebaseui-container {
-  background-image: url('./loading.gif');
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-}
-
 .mdl-progress {
   display: none;
 }
 
 .mdl-card .firebaseui-callback-indicator-container::after {
-  color: black;
-  content: 'Authenticating...';
-  display: block;
+  color:      black;
+  content:    'Authenticating...';
+  display:    block;
   text-align: center;
+  padding-top: 20px;
+}
+
+.mdl-card .firebaseui-callback-indicator-container {
+  height:              200px;
+  background-image:    url('./loading.gif');
+  background-repeat:   no-repeat;
+  background-position: 50% 50%;
 }

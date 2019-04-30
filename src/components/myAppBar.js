@@ -22,16 +22,12 @@ import Avatar         from '@material-ui/core/Avatar';
 // -------------------------------------------------------------------------------------------------
 import PropTypes from 'prop-types';
 import { Link }  from 'react-router-dom';
+import { FaGithub as NoAvatar } from 'react-icons/fa';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Firebase)
 // -------------------------------------------------------------------------------------------------
 import * as FirebaseAuth from './firebase/firebaseAuth';
-
-// -------------------------------------------------------------------------------------------------
-// * Import Modules(Self Made)
-// -------------------------------------------------------------------------------------------------
-import styles   from '../css/style'
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -85,6 +81,58 @@ class MyAppBar extends React.Component {
     );
   }
 };
+
+// -------------------------------------------------------------------------------------------------
+// Styles
+// -------------------------------------------------------------------------------------------------
+const styles = theme => {
+  return ({
+    avatarIcon: {
+      fontSize: 40,
+    },
+
+    avatar: {
+      display: 'inline-table',
+    },
+
+    siteTitle: {
+      marginTop: 10,
+    },
+
+    siteTitleLink: {
+      marginRight:    20,
+      color:          'white',
+      '&:hover': {
+        textDecoration: 'none',
+      },
+      '&:visited': {
+        color:          'white',
+      },
+    },
+
+    login: {
+      marginLeft: 'auto',
+    },
+
+    toolbar: {
+      //paddingTop: 10,
+    },
+
+    // 幅600px以上の場合に非表示
+    hideLg: {
+      '@media screen and (min-width:600px)': { display: 'none' }
+    },
+
+    // 幅600px未満の場合に非表示
+    hideSm: {
+      '@media screen and (max-width:599px)': { display: 'none' }
+    },
+
+    menuIconForSm: {
+      marginLeft: 10,
+    },
+  });
+}
 
 // --------------------------------------------------------------------------------------
 // PropTypes
@@ -148,21 +196,25 @@ const MenuListForSm = ({user, anchorEl, closeMenu}) => {
 }
 
 const SignInOut = ({c, user, isLoading}) => {
+  console.log(user);
   return (
     <div className={c.login} style={{visibility: isLoading ? "hidden" : "visible"}}>
       {
         user ?
-        <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar} />
-        :
-        <AccountCircle className={c.avatarIcon} />
+          user.photoURL ?
+            <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar} />
+            :
+            <NoAvatar className={c.avatarIcon} />
+          :
+          <AccountCircle className={c.avatarIcon} />
       }
 
       <span className={c.hideSm}>
       { 
         user ?
-        <Button color="inherit" component={Link} to="/" onClick={()=>FirebaseAuth.signOut()} >Sign out</Button>
-        :
-        <Button color="inherit" component={Link} to="/signin">Sign in</Button>
+          <Button color="inherit" component={Link} to="/" onClick={()=>FirebaseAuth.signOut()} >Sign out</Button>
+          :
+          <Button color="inherit" component={Link} to="/signin">Sign in</Button>
       }
       </span>
     </div>

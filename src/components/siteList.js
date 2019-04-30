@@ -55,7 +55,6 @@ class SiteList extends React.Component {
   getSiteList = (page) => {
     const promise = Api.getSiteList(page, this.props.order);
     promise.then(res => {
-      console.log(res.status);
       if (res.status === 200) {
         const newList = this.state.list.concat(res.data);
         this.setState({ 

@@ -58,7 +58,6 @@ class SiteReaction extends React.Component {
     const promise = Api.getReactionsCount();
     promise.then(res => {
       if (res.status === 200) {
-        console.log(res.data);
         this.setState({ reactions: res.data });
       }
     });
@@ -68,7 +67,6 @@ class SiteReaction extends React.Component {
     const promise = Api.getViewCount();
     promise.then(res => {
       if (res.status === 200) {
-        console.log(res.data);
         this.setState({ view: res.data });
       }
     });
