@@ -1,0 +1,20 @@
+{
+  "status": 200,
+  "data": { 
+    "message": "success",
+    "siteInfo": {
+      "owner":      "john smith",
+      "siteName":   "portafoglio",
+      "siteUrl" :   "http://www.example.com",
+      "period":     1,
+      "periodUnit": "day",
+      "usedSkills": [
+                      { "value": "ruby",  "label": "ruby"  },
+                      { "value": "rails", "label": "rails" },
+                      { "value": "react", "label": "react" }
+      ],
+      "comment":    "something comment",
+      "updateAt":   "2019/04/30"
+    }
+  } 
+}

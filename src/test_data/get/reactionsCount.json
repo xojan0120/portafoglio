@@ -1,0 +1,9 @@
+{
+  "status": 200,
+  "data": {
+    "message": "success",
+    "reactions": {
+      "good": 123
+    }
+  }
+}

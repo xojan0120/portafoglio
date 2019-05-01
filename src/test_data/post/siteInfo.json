@@ -1,0 +1,8 @@
+{
+  "siteName":   "john smith",
+  "siteUrl":    "http://www.example.com",
+  "period":     1,
+  "periodUnit": "day",
+  "usedSkills": ["ruby", "rails", "react"],
+  "comment":    "something comment"
+}

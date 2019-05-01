@@ -1,5 +1,4 @@
 {
-  "status": 204,
-  "message": "items not found",
-  "data": []
+  "status": 404,
+  "message": "Not found"
 }

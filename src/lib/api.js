@@ -1,20 +1,21 @@
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-//import axios from 'axios';
+import axios from 'axios';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Test Data
 // -------------------------------------------------------------------------------------------------
-import testSites1         from '../test_data/sites1.json';
-import testSites2         from '../test_data/sites2.json';
-import testSites3         from '../test_data/sites3.json';
-import testSites4         from '../test_data/sites4.json';
-import testUnits          from '../test_data/periodUnits.json';
-import testSkills         from '../test_data/skills.json';
-import testReactionsCount from '../test_data/reactionsCount.json';
-import testViewCount      from '../test_data/viewCount.json';
-import testSiteInfo       from '../test_data/siteInfo.json';
+import testSites1         from '../test_data/get/sites1.json';
+import testSites2         from '../test_data/get/sites2.json';
+import testSites3         from '../test_data/get/sites3.json';
+import testSites4         from '../test_data/get/sites4.json';
+import testUnits          from '../test_data/get/periodUnits.json';
+import testSkills         from '../test_data/get/skills.json';
+import testReactionsCount from '../test_data/get/reactionsCount.json';
+import testViewCount      from '../test_data/get/viewCount.json';
+import testSiteInfo       from '../test_data/get/siteInfo.json';
+import testAuthSiteOwner  from '../test_data/get/authSiteOwner.json';
 
 import notFoundJson from '../test_data/notFound.json';
 
@@ -89,4 +90,29 @@ export const getSiteInfo = () => {
     },1000);
   });
   return promise;
+}
+
+export const authSiteOwner = (siteId, token) => {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testAuthSiteOwner);
+    },1000);
+  });
+  return promise;
+}
+
+export const updateSiteInfo = (data) => {
+  const instance = axios.create({ 
+    baseURL: 'http://192.168.33.10:3001/api/v1/',
+    headers: {
+      'Authorization': 'Bearer TEST-TOKEN'
+    },
+  });
+  const promise = instance.post('/items/auth3', {title: "にほんご ふが"});
+  promise.then(res => {
+    console.log(res);
+    console.log(res.status);
+    console.log(res.data.message);
+    console.log(res.data.title);
+  });
 }

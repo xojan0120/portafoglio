@@ -1,0 +1,13 @@
+{
+  "status": 200,
+  "data": {
+    "message": "success",
+    "periodUnits": [
+      { "value": "hour",  "label": "hour"  },
+      { "value": "day",   "label": "day"   },
+      { "value": "week",  "label": "week"  },
+      { "value": "month", "label": "month" },
+      { "value": "year",  "label": "year"  }
+    ]
+  }
+}

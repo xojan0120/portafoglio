@@ -6,7 +6,13 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import Grid from '@material-ui/core/Grid';
+import Grid           from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Third Party)
+// -------------------------------------------------------------------------------------------------
+import PropTypes     from 'prop-types';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -28,9 +34,10 @@ class SiteDetail extends React.Component {
   // Render Methods
   // --------------------------------------------------------------------------------------
   render() {
+    const c = this.props.classes;
     return (
-      <Grid container spacing={24} style={{margin: 10}}>
-        <Grid item xs={8}>
+      <Grid container spacing={24} className={c.container} >
+        <Grid item xs={8} className={c.screenshot} >
           <SiteScreenshot />
         </Grid>
         <Grid item xs={4}>
@@ -44,7 +51,29 @@ class SiteDetail extends React.Component {
   }
 }
 
+// -------------------------------------------------------------------------------------------------
+// Styles
+// -------------------------------------------------------------------------------------------------
+const styles = theme => {
+  return ({
+    container: {
+      margin: 10,
+    },
+
+    screenshot: {
+      height: '80vh',
+    },
+  });
+}
+
+// --------------------------------------------------------------------------------------
+// PropTypes
+// --------------------------------------------------------------------------------------
+SiteDetail.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
 // --------------------------------------------------------------------------------------
 // Export Module
 // --------------------------------------------------------------------------------------
-export default SiteDetail;
+export default withStyles(styles)(SiteDetail);

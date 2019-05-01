@@ -21,12 +21,6 @@ import {
 import PropTypes from 'prop-types';
 
 // -------------------------------------------------------------------------------------------------
-// * Import Modules(Firebase)
-// -------------------------------------------------------------------------------------------------
-import './firebase/loading.css';
-import * as FirebaseAuth from './firebase/firebaseAuth';
-
-// -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
 import About      from './about';
@@ -34,6 +28,7 @@ import MyAppBar   from './myAppBar';
 import SiteList   from './siteList';
 import SiteDetail from './siteDetail';
 import NotFound   from './notFound';
+import SignIn     from './signIn';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
@@ -46,14 +41,6 @@ import styles from '../css/style'
 class App extends React.Component {
   constructor(props) {
     super(props);
-  }
-
-  // --------------------------------------------------------------------------------------
-  // Other Methods
-  // --------------------------------------------------------------------------------------
-  hook = (callback) => {
-    FirebaseAuth.uiHide();
-    return callback;
   }
 
   // --------------------------------------------------------------------------------------
@@ -70,24 +57,23 @@ class App extends React.Component {
             render={() => <Redirect to="/sites/new" />} />
 
           <Route exact path={["/sites/new", "/sites/new/:page"]}
-            render={(match) => this.hook(<SiteList order="new" {...match} />)} />
+            render={(match) => <SiteList order="new" {...match} />} />
 
           <Route exact path={["/sites/random", "/sites/new/:random"]}
-            render={() => this.hook(<SiteList order="random" />)} />
+            render={() => <SiteList order="random" />} />
 
           <Route exact path="/about"
-            render={() => this.hook(<About param="123" />)} />
+            render={() => <About param="123" />} />
 
           <Route exact path="/signin"
-            render={() => FirebaseAuth.uiShow()} />
+            render={() => <SignIn />} />
 
           <Route exact path="/sites/:siteId/detail" 
-            render={(match) => this.hook(<SiteDetail {...match} />)} />
+            render={(match) => <SiteDetail {...match} />} />
 
           <Route component={NotFound} />
         </Switch>
 
-        <div id="firebaseui-auth-container"></div>
       </Router>
     );
   }
