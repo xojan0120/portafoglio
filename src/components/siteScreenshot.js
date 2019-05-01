@@ -51,9 +51,9 @@ class SiteScreenshot extends React.Component {
       <Card className={siteScreenshotCardClass(c, this.state.screenshot)} >
         { 
           this.state.screenshot ?
-          <Screenshot c={c} />
-          :
-          <Dropzone component={()=><NoImage c={c} />} callBack={(data)=>this.upload(data)} />
+            <Screenshot c={c} />
+            :
+            <Dropzone component={()=><NoImage c={c} />} callBack={(data)=>this.upload(data)} />
         }
       </Card>
     );

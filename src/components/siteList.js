@@ -27,9 +27,9 @@ class SiteList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      list: [],
+      list:         [],
       hasMoreItems: true,
-      page: this.getPage(this.props.location.pathname),
+      page:         this.getPage(this.props.location.pathname),
     };
   }
 

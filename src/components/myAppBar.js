@@ -196,7 +196,6 @@ const MenuListForSm = ({user, anchorEl, closeMenu}) => {
 }
 
 const SignInOut = ({c, user, isLoading}) => {
-  console.log(user);
   return (
     <div className={c.login} style={{visibility: isLoading ? "hidden" : "visible"}}>
       {

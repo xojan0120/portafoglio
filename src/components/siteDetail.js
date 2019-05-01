@@ -34,7 +34,7 @@ class SiteDetail extends React.Component {
           <SiteScreenshot />
         </Grid>
         <Grid item xs={4}>
-          <SiteInfo />
+          <SiteInfo siteId={this.props.match.params.siteId} />
         </Grid>
         <Grid item xs={8}>
           <SiteReaction />

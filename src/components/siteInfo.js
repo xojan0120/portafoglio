@@ -41,6 +41,11 @@ import {
   cmnValidCommentLength,
 }               from '../lib/constants';
 
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
+import * as FirebaseAuth from './firebase/firebaseAuth';
+
 // ----------------------------------------------------------------------------------------
 // * Main Class
 // ----------------------------------------------------------------------------------------
@@ -61,6 +66,14 @@ class SiteInfo extends React.Component {
       updateAt:    '2019/04/30',
     };
 
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      //this.setState({
+      //  user:      user,
+      //  isLoading: false,
+      //});
+      console.log(user);
+      console.log(props.siteId);
+    });
   }
 
   // --------------------------------------------------------------------------------------
