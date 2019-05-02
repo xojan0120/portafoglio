@@ -101,18 +101,29 @@ export const authSiteOwner = (siteId, token) => {
   return promise;
 }
 
-export const updateSiteInfo = (data) => {
-  const instance = axios.create({ 
-    baseURL: 'http://192.168.33.10:3001/api/v1/',
-    headers: {
-      'Authorization': 'Bearer TEST-TOKEN'
-    },
-  });
+const instance = axios.create({ 
+  baseURL: 'http://192.168.33.10:3001/api/v1/',
+  //headers: {
+  //  'Authorization': 'Bearer TEST-TOKEN'
+  //},
+});
+
+export const updateSiteInfo = (data, token) => {
+  if (token) {
+    instance.interceptors.request.use(config => {
+      config.headers.Authorization = `Bearer ${token}`;
+      return config
+    })
+  }
   const promise = instance.post('/items/auth3', {title: "にほんご ふが"});
-  promise.then(res => {
-    console.log(res);
-    console.log(res.status);
-    console.log(res.data.message);
-    console.log(res.data.title);
-  });
+  promise
+    .then(res => {
+      console.log(res);
+      console.log(res.status);
+      console.log(res.data.message);
+      console.log(res.data.title);
+    })
+    .catch(error => {
+      console.log(error.message);
+    });
 }

@@ -500,7 +500,7 @@ const CommentField = ({disabled, c, value, onChange, error}) => {
 const Actions = ({c}) => {
   return (
     <CardActions className={c.infoActions}>
-      <Button size="small" color="primary" onClick={Api.updateSiteInfo} >
+      <Button size="small" color="primary" onClick={() => Api.updateSiteInfo( {} , 'TEST-TOKEN' )} >
         Update
       </Button>
       <Button size="small" color="primary">
