@@ -27,6 +27,7 @@ import Button         from '@material-ui/core/Button';
 import PropTypes       from 'prop-types';
 import classNames      from 'classnames';
 import CreatableSelect from 'react-select/lib/Creatable';
+import update          from 'immutability-helper';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -56,16 +57,26 @@ class SiteInfo extends React.Component {
     super(props);
 
     this.state = {
-      owner:       '',    errorOwner:      false,
-      siteName:    '',    errorSiteName:   false,
-      siteUrl:     '',    errorSiteUrl:    false,
-      period:       0,    errorPeriod:     false,
-      periodUnit:  'day',
-      usedSkills:  [],    errorUsedSkills: false,
+      siteInfo: {
+        owner:       '',
+        siteName:    '',
+        siteUrl:     '',
+        period:       0,
+        periodUnit:  'day',
+        usedSkills:  [],
+        comment:     '',
+        updateAt:    '',
+      },
+      errors: {
+        owner:      false,
+        siteName:   false,
+        siteUrl:    false,
+        period:     false,
+        usedSkills: false,
+        comment:    false,
+      },
       periodUnits: [],
       skills:      [],
-      comment:     '',    errorComment:    false,
-      updateAt:    '',
       authOwner:   false,
     };
 
@@ -98,7 +109,6 @@ class SiteInfo extends React.Component {
     const promise = Api.getPeriodUnits();
     promise.then(res => {
       if (res.status === 200) {
-        //this.setState(res.data.periodUnits);
         this.setState({ periodUnits: res.data.periodUnits });
       }
     });
@@ -117,7 +127,7 @@ class SiteInfo extends React.Component {
     const promise = Api.getSiteInfo();
     promise.then(res => {
       if (res.status === 200) {
-        this.setState(res.data.siteInfo);
+        this.setState({ siteInfo: res.data.siteInfo });
       }
     });
   }
@@ -125,19 +135,31 @@ class SiteInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   // * Event handlers and Related Methods
   // --------------------------------------------------------------------------------------
-  handleOwner = (event) => {
-    if (event.target.value.length <= cmnValidOwnerLength) {
-      this.setState({ owner: event.target.value, errorOwner: false });
-    } else {
-      this.setState({ errorOwner: `Please use ${cmnValidOwnerLength} characters or less.` });
-    }
-  }
+  //handleOwner = (event) => {
+  //  if (event.target.value.length <= cmnValidOwnerLength) {
+  //    this.setState({
+  //      siteInfo: update(this.state.siteInfo, { owner: {$set: event.target.value} }),
+  //      errors:   update(this.state.errors,   { owner: {$set: false} })
+  //    });
+  //  } else {
+  //    const msg = `Please use ${cmnValidOwnerLength} characters or less.`; 
+  //    this.setState({
+  //      errors:   update(this.state.errors,   { owner: {$set: msg} })
+  //    });
+  //  }
+  //}
 
   handleSiteName = (event) => {
     if (event.target.value.length <= cmnValidSiteNameLength) {
-      this.setState({ siteName: event.target.value, errorSiteName: false });
+      this.setState({
+        siteInfo: update(this.state.siteInfo, { siteName: {$set: event.target.value} }),
+        errors:   update(this.state.errors,   { siteName: {$set: false} })
+      });
     } else {
-      this.setState({ errorSiteName: `Please use ${cmnValidSiteNameLength} characters or less.` });
+      const msg = `Please use ${cmnValidSiteNameLength} characters or less.`; 
+      this.setState({
+        errors:   update(this.state.errors,   { siteName: {$set: msg} })
+      });
     }
   }
 
@@ -145,43 +167,68 @@ class SiteInfo extends React.Component {
     //const re = /(?:^|[\s　]+)((?:https?):\/\/[^\s　]+)/
 
     if (event.target.value.length <= cmnValidSiteUrlLength) {
-      this.setState({ siteUrl: event.target.value, errorSiteUrl: false });
+      this.setState({
+        siteInfo: update(this.state.siteInfo, { siteUrl: {$set: event.target.value} }),
+        errors:   update(this.state.errors,   { siteUrl: {$set: false} })
+      });
     } else {
-      this.setState({ errorSiteUrl: `Please use ${cmnValidSiteUrlLength} characters or less.` });
+      const msg = `Please use ${cmnValidSiteUrlLength} characters or less.`; 
+      this.setState({
+        errors:   update(this.state.errors,   { siteUrl: {$set: msg} })
+      });
     }
   }
 
   handlePeriod = (event) => {
     if (event.target.value >= cmnValidCreationPeriodMin &&
       event.target.value <= cmnValidCreationPeriodMax) {
-      this.setState({ period: event.target.value, errorPeriod: false });
+      this.setState({
+        siteInfo: update(this.state.siteInfo, { period: {$set: event.target.value} }),
+        errors:   update(this.state.errors,   { period: {$set: false} })
+      });
     } else {
-      this.setState({ errorPeriod: true });
+      this.setState({
+        errors:   update(this.state.errors,   { period: {$set: true} })
+      });
     }
   }
 
   handlePeriodUnit = (event) => {
-    this.setState({ periodUnit: event.target.value });
+    this.setState({
+      siteInfo: update(this.state.siteInfo, { periodUnit: {$set: event.target.value} })
+    });
   }
 
-  handleSkill = (newValue, actionMeta) => {
+  handleUsedSkills = (newValue, actionMeta) => {
     // TODO: 入力されたスキル名の長さもチェックする(モデル側は10文字)
     if (newValue.length <= cmnValidUsedSkillsQuantity) {
       console.group('Value Changed');
       console.log(newValue);
       console.log(`action: ${actionMeta.action}`);
       console.groupEnd();
-      this.setState({ usedSkills: newValue, errorUsedSkills: false });
+      this.setState({
+        siteInfo: update(this.state.siteInfo, { usedSkills: {$set: newValue} }),
+        errors:   update(this.state.errors,   { usedSkills: {$set: false} })
+      });
     } else {
-      this.setState({ errorUsedSkills: `Please select ${cmnValidUsedSkillsQuantity} or less.` });
+      const msg = `Please select ${cmnValidUsedSkillsQuantity} or less.`; 
+      this.setState({
+        errors:   update(this.state.errors,   { usedSkills: {$set: msg} })
+      });
     }
   };
 
   handleComment = (event) => {
     if (event.target.value.length <= cmnValidCommentLength) {
-      this.setState({ comment: event.target.value, errorComment: false });
+      this.setState({
+        siteInfo: update(this.state.siteInfo, { comment: {$set: event.target.value} }),
+        errors:   update(this.state.errors,   { comment: {$set: false} })
+      });
     } else {
-      this.setState({ errorComment: `Please use ${cmnValidCommentLength} characters or less.` });
+      const msg = `Please use ${cmnValidCommentLength} characters or less.`; 
+      this.setState({
+        errors:   update(this.state.errors,   { comment: {$set: msg} })
+      });
     }
   }
 
@@ -195,14 +242,14 @@ class SiteInfo extends React.Component {
         <form className={c.container} autoComplete="off">
           <SiteInfoTextField
             disabled={true} 
-            required={true}
+            required={false}
             Icon={OwnerIcon}
             id="owner"
             label="Owner"
             c={c}
-            value={this.state.owner}
-            onChange={(event)=>this.handleOwner(event)}
-            error={this.state.errorOwner}
+            value={this.state.siteInfo.owner}
+            //onChange={(event)=>this.handleOwner(event)}
+            //error={this.state.errors.owner}
           />
           <SiteInfoTextField
             disabled={!this.state.authOwner}
@@ -211,10 +258,10 @@ class SiteInfo extends React.Component {
             id="siteName"
             label="Site name"
             c={c}
-            value={this.state.siteName}
+            value={this.state.siteInfo.siteName}
             onChange={(event)=>this.handleSiteName(event)}
             placeholder="Your site name"
-            error={this.state.errorSiteName}
+            error={this.state.errors.siteName}
           />
           <SiteInfoTextField
             disabled={!this.state.authOwner}
@@ -223,18 +270,18 @@ class SiteInfo extends React.Component {
             id="siteUrl"
             label="Site URL"
             c={c}
-            value={this.state.siteUrl}
+            value={this.state.siteInfo.siteUrl}
             onChange={(event)=>this.handleSiteUrl(event)}
             placeholder="Your site URL"
-            error={this.state.errorSiteUrl}
+            error={this.state.errors.siteUrl}
           />
           <Grid container alignItems="flex-end">
             <Grid item>
               <PeriodField
                 disabled={!this.state.authOwner}
                 c={c}
-                value={this.state.period}
-                error={this.state.errorPeriod}
+                value={this.state.siteInfo.period}
+                error={this.state.errors.period}
                 onChange={(event)=>this.handlePeriod(event)}
               />
             </Grid>
@@ -242,26 +289,26 @@ class SiteInfo extends React.Component {
               <PeriodUnitField
                 disabled={!this.state.authOwner}
                 c={c}
-                value={this.state.periodUnit}
+                value={this.state.siteInfo.periodUnit}
                 onChange={(event)=>this.handlePeriodUnit(event)}
                 units={this.state.periodUnits}
               />
             </Grid>
           </Grid>
-          <SkillField
+          <UsedSkillsField
             disabled={!this.state.authOwner}
             c={c}
-            value={this.state.usedSkills}
-            error={this.state.errorUsedSkills}
-            onChange={(newValue, actionMeta)=>this.handleSkill(newValue, actionMeta)}
+            value={this.state.siteInfo.usedSkills}
+            error={this.state.errors.usedSkills}
+            onChange={(newValue, actionMeta)=>this.handleUsedSkills(newValue, actionMeta)}
             skills={this.state.skills}
           />
           <CommentField
             disabled={!this.state.authOwner}
             c={c}
-            value={this.state.comment}
+            value={this.state.siteInfo.comment}
             onChange={(event)=>this.handleComment(event)}
-            error={this.state.errorComment}
+            error={this.state.errors.comment}
           />
           <SiteInfoTextField
             disabled={true}
@@ -270,7 +317,7 @@ class SiteInfo extends React.Component {
             id="updateAt"
             label="Update at"
             c={c}
-            value={this.state.updateAt}
+            value={this.state.siteInfo.updateAt}
             onChange={(event)=>this.handleComment(event)}
           />
         </form>
@@ -431,7 +478,7 @@ const PeriodUnitField = ({disabled, c, value, error, onChange, units}) => {
   );
 }
 
-const SkillField = ({disabled, c, value, error, onChange, skills}) => {
+const UsedSkillsField = ({disabled, c, value, error, onChange, skills}) => {
   const customStyles = {
     control: (provided, state) => ({
       ...provided,
