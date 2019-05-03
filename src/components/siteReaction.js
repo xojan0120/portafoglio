@@ -55,21 +55,15 @@ class SiteReaction extends React.Component {
   // Other Methods
   // --------------------------------------------------------------------------------------
   getReactionsCount = () => {
-    const promise = Api.getReactionsCount();
-    promise.then(res => {
-      if (res.status === 200) {
-        this.setState({reactions: res.data.reactions });
-      }
-    });
+    Api.getReactionsCount()
+      .then (res   => { if (res.status === 200) this.setState({ reactions: res.data.reactions }) })
+      .catch(error => console.log(error));
   }
 
   getViewCount = () => {
-    const promise = Api.getViewCount();
-    promise.then(res => {
-      if (res.status === 200) {
-        this.setState({ view: res.data.view });
-      }
-    });
+    Api.getViewCount()
+      .then (res   => { if (res.status === 200) this.setState({ view: res.data.view }) })
+      .catch(error => console.log(error));
   }
 
   // --------------------------------------------------------------------------------------
@@ -109,22 +103,28 @@ class SiteReaction extends React.Component {
 // -------------------------------------------------------------------------------------------------
 const styles = theme => ({
   reactionButton: {
-    fontSize: 'large',
+    [theme.breakpoints.up('md')]: {
+      fontSize: 'large',
+    },
     marginRight: 15,
   },
 
   reactionIcon: {
-    marginRight: 5,
+    marginRight:  5,
     marginBottom: 5,
   },
 
   viewIcon: {
-    fontSize: 24,
+    [theme.breakpoints.up('md')]: {
+      fontSize: 24,
+    },
     marginRight: 5,
   },
 
   viewCount: {
-    fontSize: 18,
+    [theme.breakpoints.up('md')]: {
+      fontSize: 18,
+    },
     verticalAlign: 'middle',
   },
 });

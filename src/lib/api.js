@@ -4,21 +4,54 @@
 import axios from 'axios';
 
 // -------------------------------------------------------------------------------------------------
+// * Import Modules(Self Made)
+// -------------------------------------------------------------------------------------------------
+import { cmnApiEndpointUri } from './constants';
+
+// -------------------------------------------------------------------------------------------------
 // * Import Test Data
 // -------------------------------------------------------------------------------------------------
-import testSites1         from '../test_data/get/sites1.json';
-import testSites2         from '../test_data/get/sites2.json';
-import testSites3         from '../test_data/get/sites3.json';
-import testSites4         from '../test_data/get/sites4.json';
-import testUnits          from '../test_data/get/periodUnits.json';
-import testSkills         from '../test_data/get/skills.json';
-import testReactionsCount from '../test_data/get/reactionsCount.json';
-import testViewCount      from '../test_data/get/viewCount.json';
-import testSiteInfo       from '../test_data/get/siteInfo.json';
-import testAuthSiteOwner  from '../test_data/get/authSiteOwner.json';
+import testGetSites1         from '../test_data/get/sites1.json';
+import testGetSites2         from '../test_data/get/sites2.json';
+import testGetSites3         from '../test_data/get/sites3.json';
+import testGetSites4         from '../test_data/get/sites4.json';
+import testGetUnits          from '../test_data/get/periodUnits.json';
+import testGetSkills         from '../test_data/get/skills.json';
+import testGetReactionsCount from '../test_data/get/reactionsCount.json';
+import testGetViewCount      from '../test_data/get/viewCount.json';
+import testGetSiteInfo       from '../test_data/get/siteInfo.json';
+import testGetAuthSiteOwner  from '../test_data/get/authSiteOwner.json';
+import testPostSiteInfo      from '../test_data/post/siteInfo.json';
 
 import notFoundJson from '../test_data/notFound.json';
 
+// -------------------------------------------------------------------------------------------------
+// * Axios initialize
+// -------------------------------------------------------------------------------------------------
+const ajax = axios.create({ 
+  baseURL: cmnApiEndpointUri,
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest', // クロスドメインの場合必要
+  },
+  responseType: 'json'
+});
+
+// -------------------------------------------------------------------------------------------------
+// * Axios related functions
+// -------------------------------------------------------------------------------------------------
+const withAuth = (token) => {
+  if (token) {
+    ajax.interceptors.request.use(config => {
+      config.headers.Authorization = `Bearer ${token}`;
+      return config
+    })
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+// * API functions
+// -------------------------------------------------------------------------------------------------
 // order => 'new' or 'random'
 export const getSiteList = (page, order) => {
   const promise = new Promise((resolve, reject) => {
@@ -26,16 +59,16 @@ export const getSiteList = (page, order) => {
       let json = null;
       switch (page) {
         case 1:
-          json = testSites1;
+          json = testGetSites1;
           break;
         case 2:
-          json = testSites2;
+          json = testGetSites2;
           break;
         case 3:
-          json = testSites3;
+          json = testGetSites3;
           break;
         case 4:
-          json = testSites4;
+          json = testGetSites4;
           break;
         default:
           json = notFoundJson;
@@ -50,7 +83,7 @@ export const getSiteList = (page, order) => {
 export const getPeriodUnits = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testUnits);
+      resolve(testGetUnits);
     },1000);
   });
   return promise;
@@ -59,7 +92,7 @@ export const getPeriodUnits = () => {
 export const getSkills = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testSkills);
+      resolve(testGetSkills);
     },1000);
   });
   return promise;
@@ -68,7 +101,7 @@ export const getSkills = () => {
 export const getReactionsCount = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testReactionsCount);
+      resolve(testGetReactionsCount);
     },1000);
   });
   return promise;
@@ -77,7 +110,7 @@ export const getReactionsCount = () => {
 export const getViewCount = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testViewCount);
+      resolve(testGetViewCount);
     },1000);
   });
   return promise;
@@ -86,7 +119,7 @@ export const getViewCount = () => {
 export const getSiteInfo = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testSiteInfo);
+      resolve(testGetSiteInfo);
     },1000);
   });
   return promise;
@@ -95,35 +128,31 @@ export const getSiteInfo = () => {
 export const authSiteOwner = (siteId, token) => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
-      resolve(testAuthSiteOwner);
+      resolve(testGetAuthSiteOwner);
     },1000);
   });
   return promise;
 }
 
-const instance = axios.create({ 
-  baseURL: 'http://192.168.33.10:3001/api/v1/',
-  //headers: {
-  //  'Authorization': 'Bearer TEST-TOKEN'
-  //},
-});
-
-export const updateSiteInfo = (data, token) => {
-  if (token) {
-    instance.interceptors.request.use(config => {
-      config.headers.Authorization = `Bearer ${token}`;
-      return config
-    })
-  }
-  const promise = instance.post('/items/auth3', {title: "にほんご ふが"});
-  promise
-    .then(res => {
-      console.log(res);
-      console.log(res.status);
-      console.log(res.data.message);
-      console.log(res.data.title);
-    })
-    .catch(error => {
-      console.log(error.message);
-    });
+export const updateSiteInfo = (data, token, uid) => {
+  console.log(token);
+  withAuth(token)
+  const promise = ajax.post('/items/auth3', Object.assign(data, {uid: uid}));
+  //promise
+  //  .then(res => {
+  //    console.log(res);
+  //    console.log(res.status);
+  //    console.log(res.data.message);
+  //  })
+  //  .catch(error => {
+  //    console.log(error.message);
+  //  });
+  
+  //console.log(data);
+  //const promise = new Promise((resolve, reject) => {
+  //  setTimeout(()=> {
+  //    resolve(testPostSiteInfo);
+  //  },1000);
+  //});
+  return promise;
 }

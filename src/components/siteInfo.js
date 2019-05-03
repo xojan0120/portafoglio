@@ -20,6 +20,7 @@ import UpdateAtIcon   from '@material-ui/icons/CalendarToday';
 import Card           from '@material-ui/core/Card';
 import CardActions    from '@material-ui/core/CardActions';
 import Button         from '@material-ui/core/Button';
+import Snackbar       from '@material-ui/core/Snackbar';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -43,6 +44,7 @@ import {
   cmnValidUsedSkillsQuantity,
   cmnValidCommentLength,
 }               from '../lib/constants';
+import * as Cmn from '../lib/common';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Firebase)
@@ -58,14 +60,14 @@ class SiteInfo extends React.Component {
 
     this.state = {
       siteInfo: {
-        owner:       '',
-        siteName:    '',
-        siteUrl:     '',
-        period:       0,
-        periodUnit:  'day',
-        usedSkills:  [],
-        comment:     '',
-        updateAt:    '',
+        owner:      '',
+        siteName:   '',
+        siteUrl:    '',
+        period:      0,
+        periodUnit: 'day',
+        usedSkills: [],
+        comment:    '',
+        updateAt:   '',
       },
       errors: {
         owner:      false,
@@ -75,20 +77,29 @@ class SiteInfo extends React.Component {
         usedSkills: false,
         comment:    false,
       },
-      periodUnits: [],
-      skills:      [],
-      authOwner:   false,
+      periodUnits:  [],
+      skills:       [],
+      authOwner:    false,
+      snackOpen:    false,
+      snackMessage: '',
+      user:         null,
     };
 
     FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-      const promise = Api.authSiteOwner(props.siteId, user.email);
-      promise.then(res => {
-        if (res.status === 200 && res.data.result === "true") {
-          this.setState({ authOwner: true });
-        } else {
-          this.setState({ authOwner: false });
-        }
-      });
+      if(user) {
+        Api.authSiteOwner(props.siteId, user.email)
+          .then(res => {
+            if (res.status === 200 && res.data.result === "true") {
+              this.setState({ authOwner: true });
+            } else {
+              this.setState({ authOwner: false });
+            }
+          })
+          .catch(error => console.log(error));
+        this.setState({ user: user });
+      } else {
+        this.setState({ user: null });
+      }
     });
   }
 
@@ -106,49 +117,26 @@ class SiteInfo extends React.Component {
   // Other Methods
   // --------------------------------------------------------------------------------------
   getPeriodUnits = () => {
-    const promise = Api.getPeriodUnits();
-    promise.then(res => {
-      if (res.status === 200) {
-        this.setState({ periodUnits: res.data.periodUnits });
-      }
-    });
+    Api.getPeriodUnits()
+      .then(res => { if (res.status === 200) this.setState({ periodUnits: res.data.periodUnits }) })
+      .catch(error => console.log(error));
   }
 
   getSkills = () => {
-    const promise = Api.getSkills();
-    promise.then(res => {
-      if (res.status === 200) {
-        this.setState({ skills: res.data.skills });
-      }
-    });
+    Api.getSkills()
+      .then(res => { if (res.status === 200) this.setState({ skills: res.data.skills }) })
+      .catch(error => console.log(error));
   }
 
   getSiteInfo = () => {
-    const promise = Api.getSiteInfo();
-    promise.then(res => {
-      if (res.status === 200) {
-        this.setState({ siteInfo: res.data.siteInfo });
-      }
-    });
+    Api.getSiteInfo()
+      .then(res => { if (res.status === 200) this.setState({ siteInfo: res.data.siteInfo }) })
+      .catch(error => console.log(error));
   }
 
   // --------------------------------------------------------------------------------------
   // * Event handlers and Related Methods
   // --------------------------------------------------------------------------------------
-  //handleOwner = (event) => {
-  //  if (event.target.value.length <= cmnValidOwnerLength) {
-  //    this.setState({
-  //      siteInfo: update(this.state.siteInfo, { owner: {$set: event.target.value} }),
-  //      errors:   update(this.state.errors,   { owner: {$set: false} })
-  //    });
-  //  } else {
-  //    const msg = `Please use ${cmnValidOwnerLength} characters or less.`; 
-  //    this.setState({
-  //      errors:   update(this.state.errors,   { owner: {$set: msg} })
-  //    });
-  //  }
-  //}
-
   handleSiteName = (event) => {
     if (event.target.value.length <= cmnValidSiteNameLength) {
       this.setState({
@@ -232,6 +220,43 @@ class SiteInfo extends React.Component {
     }
   }
 
+  handleUpdate = (siteInfo) => {
+    if (this.state.user) {
+      this.state.user.getIdToken(true)
+        .then (token => this.updateSiteInfo(siteInfo, token, this.state.user.uid))
+        .catch(error => console.log(error) );
+    }
+  }
+
+  updateEmail = () => {
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      if(user) {
+        user.updateEmail("xojan0120.rails@gmail.com").then(function() {
+          console.log("update email");
+        }).catch(function(error) {
+          console.log(error);
+        });
+      }
+    });
+  }
+
+  updateSiteInfo = (siteInfo, token, uid) => {
+    Api.updateSiteInfo(siteInfo, token, uid) 
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({ snackMessage: res.data.message });
+        } else {
+          this.setState({ snackMessage: res.data.message });
+        }
+      })
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
+      .finally(()    => this.setState({ snackOpen: true }));
+  }
+
+  handleSnackClose = () => {
+    this.setState({ snackOpen: false });
+  };
+
   // --------------------------------------------------------------------------------------
   // Render Methods
   // --------------------------------------------------------------------------------------
@@ -248,8 +273,6 @@ class SiteInfo extends React.Component {
             label="Owner"
             c={c}
             value={this.state.siteInfo.owner}
-            //onChange={(event)=>this.handleOwner(event)}
-            //error={this.state.errors.owner}
           />
           <SiteInfoTextField
             disabled={!this.state.authOwner}
@@ -322,7 +345,24 @@ class SiteInfo extends React.Component {
           />
         </form>
 
-        { this.state.authOwner ? <Actions c={c} /> : "" }
+        {
+          this.state.authOwner ?
+            <Actions
+              c={c}
+              siteInfo={this.state.siteInfo}
+              onClick={() => this.handleUpdate(this.state.siteInfo)}
+            />
+            :
+            ""
+        }
+
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={this.state.snackOpen}
+          onClose={this.handleSnackClose}
+          autoHideDuration={3000}
+          message={<span id="message-id">{this.state.snackMessage}</span>}
+        />
       </Card>
     );
   }
@@ -332,60 +372,66 @@ class SiteInfo extends React.Component {
 // Styles
 // -------------------------------------------------------------------------------------------------
 const styles = theme => {
-  const baseFontSize = 30;
-  const baseWidth    = 400;
+  const baseFontSize = 25;
   return ({
     infoCard: {
-      paddingLeft: 20,
-      height:      "100%",
-      width:       "90%",
-    },
+      paddingLeft:  10,
+      paddingRight: 30,
 
-    infoActions: {
-      display: 'flex',
-      justifyContent: 'flex-end',
+      [theme.breakpoints.down('sm')]: {
+        height:     '100%',
+      },
+      [theme.breakpoints.up('md')]: {
+        height:     750,
+      },
     },
 
     form: {
-      fontSize: baseFontSize,
-      width:    baseWidth,
+      display:   'flex',
+      alignItems:'center',
+      marginBottom: 10,
+    },
+
+    formItem: {
+      flexGrow: 1,
     },
 
     icon: {
-      fontSize:    50,
+      [theme.breakpoints.up('md')]: {
+        fontSize: '3rem',
+      },
       marginRight: 10,
+    },
+
+    infoActions: {
+      display:        "flex",
+      justifyContent: "flex-end",
+    },
+
+    input: {
+      [theme.breakpoints.up('md')]: {
+        fontSize: baseFontSize,
+      },
+    },
+
+    periodForm: {
+      display:   'flex',
+      alignItems:'center',
+    },
+
+    periodInput: {
+      [theme.breakpoints.up('md')]: {
+        fontSize: baseFontSize,
+      },
+      width: 50,
     },
 
     periodFormLabel: {
       width: 120,
     },
 
-    periodForm: {
-      fontSize: baseFontSize,
-      width:    90,
-    },
-
-    periodUnitForm: {
-      fontSize: baseFontSize,
-    },
-
-    usedSkillsLabel: {
-      color:        'rgba(0, 0, 0, 0.54)',
-      padding:      0,
-      fontSize:     '0.8rem',
-      lineHeight:   1,
-      marginTop:    15,
-      marginBottom: 15,
-    },
-
-    usedSkillsForm: {
-      width: baseWidth,
-    },
-
     commentForm: {
-      fontSize: 15,
-      width:    baseWidth,
-      verticalAlign: "bottom !important",
+      width: '100%',
     },
   });
 }
@@ -409,43 +455,44 @@ const SiteInfoTextField = ({
   disabled, required, Icon, id, label, c, value, onChange, placeholder, error
 }) => {
   return (
-    <Grid container alignItems="center">
-      <Grid item>
-        <Icon className={c.icon}/>
-      </Grid>
-      <Grid item>
+    <div className={c.form}>
+      <div>
+        <Icon className={c.icon} />
+      </div>
+      <div className={c.formItem}> {/* flexGrow:1でないとTextFieldのfullWidthが効かない */}
         <TextField
           disabled={disabled}
           required={required}
           id={id}
           label={label}
           InputLabelProps={{ shrink: true }}
-          InputProps={{ className: c.form }}
+          InputProps={{ className: c.input }}
           value={value}
           onChange={onChange}
           margin="normal"
           placeholder={placeholder}
           error={!!error}
           helperText={error}
+          fullWidth
         />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
 
 const PeriodField = ({disabled, c, value, error, onChange}) => {
   return (
-    <Grid container alignItems="center">
-      <Grid item>
+    <div className={c.periodForm}>
+      <div>
         <PeriodIcon className={c.icon}/>
-      </Grid>
-      <Grid item>
+      </div>
+      <div classNmae={c.formItem}>
         <TextField
           disabled={disabled}
           id="period"
           label="Creation period"
           InputLabelProps={{ shrink: true, className: c.periodFormLabel }}
-          InputProps={{ className: c.periodForm }}
+          InputProps={{ className: c.periodInput }}
           value={value}
           onChange={onChange}
           margin="normal"
@@ -453,8 +500,8 @@ const PeriodField = ({disabled, c, value, error, onChange}) => {
           type="number"
           error={!!error}
         />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
 
@@ -495,14 +542,15 @@ const UsedSkillsField = ({disabled, c, value, error, onChange, skills}) => {
     }),
   }
   return (
-    <Grid container alignItems="center">
-      <Grid item>
+    <div className={c.form}>
+      <div>
         <SkillIcon className={c.icon}/>
-      </Grid>
-      <Grid item>
+      </div>
+      <div className={c.formItem}>
         <div className={classNames(c.usedSkillsLabel, error ? "warning" : "")}>Used Skills</div>
-        <div className={c.usedSkillsForm}>
+        <div>
           <CreatableSelect
+            isClearable={false}
             isDisabled={disabled}
             styles={customStyles}
             isMulti
@@ -512,18 +560,18 @@ const UsedSkillsField = ({disabled, c, value, error, onChange, skills}) => {
           />
         </div>
         <div className={classNames(c.usedSkillsLabel,"warning")}>{error}</div>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
 
 const CommentField = ({disabled, c, value, onChange, error}) => {
   return (
-    <Grid container alignItems="center">
-      <Grid item>
+    <div className={c.form}>
+      <div>
         <CommentIcon className={c.icon}/>
-      </Grid>
-      <Grid item>
+      </div>
+      <div className={c.formItem}>
         <TextField
           disabled={disabled}
           id="comment"
@@ -538,16 +586,17 @@ const CommentField = ({disabled, c, value, onChange, error}) => {
           helperText={error}
           multiline={true}
           rows={6}
+          fullWidth
         />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
 
-const Actions = ({c}) => {
+const Actions = ({c, siteInfo, onClick}) => {
   return (
     <CardActions className={c.infoActions}>
-      <Button size="small" color="primary" onClick={() => Api.updateSiteInfo( {} , 'TEST-TOKEN' )} >
+      <Button size="small" color="primary" onClick={onClick}>
         Update
       </Button>
       <Button size="small" color="primary">

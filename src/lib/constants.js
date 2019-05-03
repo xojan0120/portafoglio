@@ -5,3 +5,4 @@ export const cmnValidCreationPeriodMin  = parseInt(process.env.REACT_APP_VALID_C
 export const cmnValidCreationPeriodMax  = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MAX);
 export const cmnValidUsedSkillsQuantity = parseInt(process.env.REACT_APP_VALID_USED_SKILLS_QUANTITY);
 export const cmnValidCommentLength      = parseInt(process.env.REACT_APP_VALID_COMMENT_LENGTH);
+export const cmnApiEndpointUri          = process.env.REACT_APP_API_ENDPOINT_URI;

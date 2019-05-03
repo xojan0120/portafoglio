@@ -24,6 +24,7 @@ import classNames    from 'classnames';
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
 import { Dropzone } from '../lib/common';
+import SiteReaction from './siteReaction';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -38,6 +39,9 @@ class SiteScreenshot extends React.Component {
   // Other Methods
   // --------------------------------------------------------------------------------------
   upload = (data) => {
+    // do upload...
+    
+    console.log(data);
     this.setState({ screenshot: true });
   }
 
@@ -47,12 +51,12 @@ class SiteScreenshot extends React.Component {
   render() {
     const c = this.props.classes;
     return (
-      <Card className={siteScreenshotCardClass(c, this.state.screenshot)} >
+      <Card className={screenshotCardClass(c, this.state.screenshot)} >
         { 
           this.state.screenshot ?
-            <Screenshot c={c} />
+            <Screenshot c={c} callBack={data => this.upload(data)} />
             :
-            <Dropzone component={()=><NoImage c={c} />} callBack={(data)=>this.upload(data)} />
+            <Dropzone component={() => <NoImage c={c} />} callBack={data => this.upload(data)} />
         }
       </Card>
     );
@@ -64,25 +68,27 @@ class SiteScreenshot extends React.Component {
 // -------------------------------------------------------------------------------------------------
 const styles = theme => {
   return ({
-    siteScreenshotCard: {
-      // 幅600px以上の場合
-      '@media screen and (min-width:600px)': { height: '100%' },
-      // 幅600px未満の場合
-      '@media screen and (max-width:599px)': { height: '30vh' },
+    screenshotCard: {
+      [theme.breakpoints.down('sm')]: {
+        height: '100%',
+      },
+      [theme.breakpoints.up('md')]: {
+        height: 750,
+      },
     },
 
     pointer: {
-      cursor: "pointer",
+      cursor: 'pointer',
     },
 
-    siteScreenshotMedia: {
-      height: '95%',
+    screenshot: {
+      height: 'auto',
+      width:  '100%',
     },
 
-    siteScreenshotActions: {
+    screenshotActions: {
       display: 'flex',
-      justifyContent: 'flex-end',
-      paddingTop: 5,
+      justifyContent: 'space-between',
     },
 
     noImage: {
@@ -90,7 +96,19 @@ const styles = theme => {
     },
 
     noImageIcon: {
-      fontSize: 500,
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '5rem',
+      },
+
+      [theme.breakpoints.up('md')]: {
+        fontSize: '20rem',
+      },
+    },
+
+    noImageComment: {
+      [theme.breakpoints.up('md')]: {
+        fontSize: '3rem',
+      },
     },
   });
 }
@@ -110,21 +128,25 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c, imageURL}) => {
+const Screenshot = ({c, imageURL, callBack}) => {
   return (
     <React.Fragment>
-      <CardMedia
-        className={c.siteScreenshotMedia}
-        image="https://material-ui.com/static/images/cards/contemplative-reptile.jpg"
-        title="Site Screenshot"
-      />
-      <CardActions className={c.siteScreenshotActions}>
-        <Button size="small" color="primary">
-          <Dropzone caption="Change" />
-        </Button>
-        <Button size="small" color="primary">
-          Delete
-        </Button>
+      <div>
+        <img className={c.screenshot} src="https://material-ui.com/static/images/cards/contemplative-reptile.jpg" />
+      </div>
+
+      <CardActions className={c.screenshotActions}>
+        <div>
+          <SiteReaction />
+        </div>
+        <div>
+          <Button size="small" color="primary">
+            <Dropzone caption="Change" callBack={callBack} />
+          </Button>
+          <Button size="small" color="primary">
+            Delete
+          </Button>
+        </div>
       </CardActions>
     </React.Fragment>
   );
@@ -134,7 +156,7 @@ const NoImage = ({c}) => {
   return (
     <div className={c.noImage}>
       <AddPhotoAlternate className={c.noImageIcon} />
-      <Typography variant="h3">
+      <Typography className={c.noImageComment}>
         Click here to upload a screenshot.
       </Typography>
     </div>
@@ -144,6 +166,6 @@ const NoImage = ({c}) => {
 // --------------------------------------------------------------------------------------
 // Return css class names functions
 // --------------------------------------------------------------------------------------
-const siteScreenshotCardClass = (c, screenshot) => {
-  return screenshot ? c.siteScreenshotCard : classNames(c.siteScreenshotCard, c.pointer)
+const screenshotCardClass = (c, screenshot) => {
+  return screenshot ? c.screenshotCard : classNames(c.screenshotCard, c.pointer)
 }

@@ -53,20 +53,19 @@ class SiteList extends React.Component {
   }
 
   getSiteList = (page) => {
-    const promise = Api.getSiteList(page, this.props.order);
-    promise.then(res => {
-      if (res.status === 200) {
-        const newList = this.state.list.concat(res.data.list);
-        this.setState({ 
-          list: newList,
-        });
+    Api.getSiteList(page, this.props.order)
+      .then(res => {
+        if (res.status === 200) {
+          const newList = this.state.list.concat(res.data.list);
+          this.setState({ list: newList, });
 
-        this.props.history.push(`/sites/${this.props.order}/${page}`);
-        this.setState({ page: page });
-      } else {
-        this.setState({ hasMoreItems: false });
-      }
-    });
+          this.props.history.push(`/sites/${this.props.order}/${page}`);
+          this.setState({ page: page });
+        } else {
+          this.setState({ hasMoreItems: false });
+        }
+      })
+      .catch(error => console.log(error));
   }
 
   getLoadMore = (page) => {

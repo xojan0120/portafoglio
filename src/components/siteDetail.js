@@ -36,16 +36,18 @@ class SiteDetail extends React.Component {
   render() {
     const c = this.props.classes;
     return (
-      <Grid container spacing={24} className={c.container} >
-        <Grid item xs={8} className={c.screenshot} >
+      <Grid container className={c.containerGrid}>
+        <Grid item xs={12} sm={12} md={8} className={c.screenshotGrid} >
           <SiteScreenshot />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={12} sm={12} md={4} >
           <SiteInfo siteId={this.props.match.params.siteId} />
         </Grid>
-        <Grid item xs={8}>
+        {/*
+        <Grid item xs={12} sm={12} md={8} className={c.siteReactionGrid} >
           <SiteReaction />
         </Grid>
+        */}
       </Grid>
     );
   }
@@ -56,12 +58,29 @@ class SiteDetail extends React.Component {
 // -------------------------------------------------------------------------------------------------
 const styles = theme => {
   return ({
-    container: {
-      margin: 10,
+    containerGrid: {
+      padding: 20,
+      //width: '90%',
     },
 
-    screenshot: {
-      height: '80vh',
+    screenshotGrid: {
+      //height: '80vh',
+      [theme.breakpoints.down('sm')]: {
+        paddingRight: 0,
+        marginBottom: 10,
+      },
+
+      [theme.breakpoints.up('md')]: {
+        paddingRight: 20,
+      },
+
+      flexBasis: '100%',
+    },
+    
+    siteReactionGrid: {
+      marginTop: 10,
+      //height: '80vh',
+      //paddingTop: 10,
     },
   });
 }
