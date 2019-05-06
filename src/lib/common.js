@@ -18,7 +18,13 @@ import {useDropzone}            from 'react-dropzone'
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import styles from '../css/style'
+import styles   from '../css/style'
+import * as Api from './api';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
+import * as FirebaseAuth from '../components/firebase/firebaseAuth';
 
 // ----------------------------------------------------------------------------------------
 // * Common Function
@@ -29,12 +35,65 @@ import styles from '../css/style'
 export const getApiError = (error) => {
   let message = '';
   try {
-    message = error.response.data.message || error.response.data.error
-  } catch(error) {
-    message = "Unknown error";
+    message = error.response.data.message || error.response.data.error;
+  } catch {
+    message = error.message;
   }
   return message;
 }
+
+export const setUser = (self) => {
+  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+    user ? self.setState({ user: user }) : self.setState({ user: null });
+    self.setState({ isLoading: false });
+  });
+}
+
+export const authSiteOwner = (self, siteId) => {
+  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+    if(user) {
+      user.getIdToken(true)
+        .then (token => {
+          Api.authSiteOwner(siteId, token)
+            .then(res => {
+              if (res.status === 200 && res.data.result === "true") {
+                self.setState({ authSiteOwner: true });
+              } else {
+                self.setState({ authSiteOwner: false });
+              }
+            })
+            .catch(error => console.log(error));
+        })
+        .catch(error => console.log(error) );
+    }
+  });
+}
+
+//export const authSiteOwner = (self, siteId) => {
+//  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+//    if(user) {
+//      // token取得
+//      user.getIdToken(true)
+//        .then (token => {
+//          // site owner判定
+//          Api.authSiteOwner(siteId, token)
+//            .then(res => {
+//              if (res.status === 200 && res.data.result === "true") {
+//                self.setState({ authSiteOwner: true });
+//              } else {
+//                self.setState({ authSiteOwner: false });
+//              }
+//            })
+//            .catch(error => console.log(error));
+//        })
+//        .catch(error => console.log(error) );
+//      // user保持
+//      self.setState({ user: user });
+//    } else {
+//      self.setState({ user: null });
+//    }
+//  });
+//}
 
 // ----------------------------------------------------------------------------------------
 // * Common Component

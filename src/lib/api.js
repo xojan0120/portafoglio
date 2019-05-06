@@ -11,18 +11,32 @@ import { cmnApiEndpointUri } from './constants';
 // -------------------------------------------------------------------------------------------------
 // * Import Test Data
 // -------------------------------------------------------------------------------------------------
-import testGetSites1         from '../test_data/get/sites1.json';
-import testGetSites2         from '../test_data/get/sites2.json';
-import testGetSites3         from '../test_data/get/sites3.json';
-import testGetSites4         from '../test_data/get/sites4.json';
-import testGetUnits          from '../test_data/get/periodUnits.json';
-import testGetSkills         from '../test_data/get/skills.json';
-import testGetReactionsCount from '../test_data/get/reactionsCount.json';
-import testGetViewCount      from '../test_data/get/viewCount.json';
-import testGetSiteInfo       from '../test_data/get/siteInfo.json';
-import testGetAuthSiteOwner  from '../test_data/get/authSiteOwner.json';
-import testPostSiteInfo      from '../test_data/post/siteInfo.json';
+// Get
+import testGetSites1          from '../test_data/get/sites1.json';
+import testGetSites2          from '../test_data/get/sites2.json';
+import testGetSites3          from '../test_data/get/sites3.json';
+import testGetSites4          from '../test_data/get/sites4.json';
+import testGetUnits           from '../test_data/get/periodUnits.json';
+import testGetSkills          from '../test_data/get/skills.json';
+import testGetReactionsCount  from '../test_data/get/reactionsCount.json';
+import testGetViewCount       from '../test_data/get/viewCount.json';
+import testGetSiteInfo        from '../test_data/get/siteInfo.json';
+import testGetAuthSiteOwner   from '../test_data/get/authSiteOwner.json';
+import testGetSiteScreenshot  from '../test_data/get/siteScreenshot.json';
+import testGetUserInfo        from '../test_data/get/userInfo.json';
+import testGetUsername        from '../test_data/get/username.json';
 
+// Post
+import testPostSiteInfo       from '../test_data/post/siteInfo.json';
+import testPostSiteScreenshot from '../test_data/post/siteScreenshot.json';
+import testPostSiteReaction   from '../test_data/post/siteReaction.json';
+import testPostSiteView       from '../test_data/post/siteView.json';
+
+// Delete
+import testDeleteSiteScreenshot from '../test_data/delete/siteScreenshot.json';
+import testDeleteSite           from '../test_data/delete/site.json';
+
+// Other
 import notFoundJson from '../test_data/notFound.json';
 
 // -------------------------------------------------------------------------------------------------
@@ -40,7 +54,7 @@ const ajax = axios.create({
 // -------------------------------------------------------------------------------------------------
 // * Axios related functions
 // -------------------------------------------------------------------------------------------------
-const withAuth = (token) => {
+const withAuthorizationHeader = (token) => {
   if (token) {
     ajax.interceptors.request.use(config => {
       config.headers.Authorization = `Bearer ${token}`;
@@ -107,6 +121,16 @@ export const getReactionsCount = () => {
   return promise;
 }
 
+export const updateReactionCount = (siteId, reaction, token, uid) => {
+  withAuthorizationHeader(token)
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testPostSiteReaction);
+    },1000);
+  });
+  return promise;
+}
+
 export const getViewCount = () => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
@@ -116,7 +140,16 @@ export const getViewCount = () => {
   return promise;
 }
 
-export const getSiteInfo = () => {
+export const updateViewCount = (siteId) => {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testPostSiteView);
+    },1000);
+  });
+  return promise;
+}
+
+export const getSiteInfo = (siteId) => {
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
       resolve(testGetSiteInfo);
@@ -126,6 +159,7 @@ export const getSiteInfo = () => {
 }
 
 export const authSiteOwner = (siteId, token) => {
+  withAuthorizationHeader(token)
   const promise = new Promise((resolve, reject) => {
     setTimeout(()=> {
       resolve(testGetAuthSiteOwner);
@@ -134,25 +168,82 @@ export const authSiteOwner = (siteId, token) => {
   return promise;
 }
 
+export const getSiteScreenshot = (siteId) => {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testGetSiteScreenshot);
+    },1000);
+  });
+  return promise;
+}
+
+export const uploadSiteScreenshot = (data, token, uid) => {
+  withAuthorizationHeader(token)
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testPostSiteScreenshot);
+    },1000);
+  });
+  return promise;
+}
+
+export const deleteSiteScreenshot = (siteId, token, uid) => {
+  withAuthorizationHeader(token)
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testDeleteSiteScreenshot);
+    },1000);
+  });
+  return promise;
+}
+
 export const updateSiteInfo = (data, token, uid) => {
-  console.log(token);
-  withAuth(token)
-  const promise = ajax.post('/items/auth3', Object.assign(data, {uid: uid}));
-  //promise
-  //  .then(res => {
-  //    console.log(res);
-  //    console.log(res.status);
-  //    console.log(res.data.message);
-  //  })
-  //  .catch(error => {
-  //    console.log(error.message);
-  //  });
+  withAuthorizationHeader(token)
   
-  //console.log(data);
   //const promise = new Promise((resolve, reject) => {
   //  setTimeout(()=> {
   //    resolve(testPostSiteInfo);
   //  },1000);
   //});
+  //return promise;
+
+  const promise = ajax.post('/items/auth3', Object.assign(data, {uid: uid}));
+  promise
+    .then(res => {
+      console.log(res);
+      console.log(res.status);
+      console.log(res.data.message);
+    })
+    .catch(error => {
+      console.log(error.message);
+    });
+  return promise;
+}
+
+export const deleteSite = (siteId, token, uid) => {
+  withAuthorizationHeader(token)
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testDeleteSite);
+    },1000);
+  });
+  return promise;
+}
+
+export const getUserInfo = () => {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testGetUserInfo);
+    },1000);
+  });
+  return promise;
+}
+
+export const getUsername = (uid) => {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(()=> {
+      resolve(testGetUsername);
+    },1000);
+  });
   return promise;
 }

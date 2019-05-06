@@ -29,6 +29,7 @@ import PropTypes       from 'prop-types';
 import classNames      from 'classnames';
 import CreatableSelect from 'react-select/lib/Creatable';
 import update          from 'immutability-helper';
+import dateFormat      from 'dateformat';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -58,6 +59,8 @@ class SiteInfo extends React.Component {
   constructor(props) {
     super(props);
 
+    const now = dateFormat(new Date(), "yyyy/mm/dd");
+
     this.state = {
       siteInfo: {
         owner:      '',
@@ -67,7 +70,7 @@ class SiteInfo extends React.Component {
         periodUnit: 'day',
         usedSkills: [],
         comment:    '',
-        updateAt:   '',
+        updateAt:   this.props.mode === 'register' ? now : '',
       },
       errors: {
         owner:      false,
@@ -79,28 +82,37 @@ class SiteInfo extends React.Component {
       },
       periodUnits:  [],
       skills:       [],
-      authOwner:    false,
+      //authSiteOwner:    false,
       snackOpen:    false,
       snackMessage: '',
-      user:         null,
+      //user:         null,
     };
 
-    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-      if(user) {
-        Api.authSiteOwner(props.siteId, user.email)
-          .then(res => {
-            if (res.status === 200 && res.data.result === "true") {
-              this.setState({ authOwner: true });
-            } else {
-              this.setState({ authOwner: false });
-            }
-          })
-          .catch(error => console.log(error));
-        this.setState({ user: user });
-      } else {
-        this.setState({ user: null });
-      }
-    });
+    //Cmn.authSiteOwner(this, props.siteId) 
+
+    //FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+    //  if(user) {
+    //    // token取得
+    //    user.getIdToken(true)
+    //      .then (token => {
+    //        // site owner判定
+    //        Api.authSiteOwner(props.siteId, token)
+    //          .then(res => {
+    //            if (res.status === 200 && res.data.result === "true") {
+    //              this.setState({ authSiteOwner: true });
+    //            } else {
+    //              this.setState({ authSiteOwner: false });
+    //            }
+    //          })
+    //          .catch(error => console.log(error));
+    //      })
+    //      .catch(error => console.log(error) );
+    //    // user保持
+    //    this.setState({ user: user });
+    //  } else {
+    //    this.setState({ user: null });
+    //  }
+    //});
   }
 
   // --------------------------------------------------------------------------------------
@@ -110,7 +122,10 @@ class SiteInfo extends React.Component {
     console.log("run componentDidMount!");
     this.getPeriodUnits();
     this.getSkills();
-    this.getSiteInfo();
+    this.getSiteInfo(this.props.siteId);
+
+    const img = document.getElementById("screenshot");
+    if (img) console.log(img.src);
   }
 
   // --------------------------------------------------------------------------------------
@@ -128,10 +143,24 @@ class SiteInfo extends React.Component {
       .catch(error => console.log(error));
   }
 
-  getSiteInfo = () => {
-    Api.getSiteInfo()
-      .then(res => { if (res.status === 200) this.setState({ siteInfo: res.data.siteInfo }) })
-      .catch(error => console.log(error));
+  getSiteInfo = (siteId) => {
+    if (this.props.mode === 'register') {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) {
+          Api.getUsername(user.uid)
+            .then(res => {
+              if (res.status === 200) {
+                this.setState({ siteInfo: update(this.state.siteInfo, { owner: {$set: res.data.username} }) });
+              }
+            })
+            .catch(error => console.log(error));
+        }
+      });
+    } else {
+      Api.getSiteInfo(siteId)
+        .then(res => { if (res.status === 200) this.setState({ siteInfo: res.data.siteInfo }) })
+        .catch(error => console.log(error));
+    }
   }
 
   // --------------------------------------------------------------------------------------
@@ -220,14 +249,50 @@ class SiteInfo extends React.Component {
     }
   }
 
+  validate = () => {
+    let result = true;
+    const newErrors = Object.assign({}, this.state.errors);
+    if (this.state.siteInfo.siteName.length === 0) {
+      newErrors.siteName = 'please input something.';
+      result = false;
+      //this.setState({
+      //  errors: update(this.state.errors, { siteName: {$set: 'please input something.'} })
+      //});
+    }
+    if (this.state.siteInfo.siteUrl.length === 0) {
+      newErrors.siteUrl = 'please input something.';
+      result = false;
+      //this.setState({
+      //  errors: update(this.state.errors, { siteUrl:  {$set: 'please input something.'} })
+      //});
+    }
+    this.setState({ errors: newErrors });
+    return result;
+  }
+
   handleUpdate = (siteInfo) => {
-    if (this.state.user) {
-      this.state.user.getIdToken(true)
-        .then (token => this.updateSiteInfo(siteInfo, token, this.state.user.uid))
-        .catch(error => console.log(error) );
+    if (this.props.user && this.validate()) {
+      this.props.user.getIdToken(true)
+        .then (token => this.updateSiteInfo(siteInfo, token, this.props.user.uid))
+        .catch(error => console.log(error));
     }
   }
 
+  handleDelete = () => {
+    if (this.props.user) {
+      this.props.user.getIdToken(true)
+        .then (token => this.deleteSite(this.props.siteId, token, this.props.user.uid))
+        .catch(error => console.log(error));
+    }
+  }
+
+  handleSnackClose = () => {
+    this.setState({ snackOpen: false });
+  };
+
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
   updateEmail = () => {
     FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
       if(user) {
@@ -253,9 +318,19 @@ class SiteInfo extends React.Component {
       .finally(()    => this.setState({ snackOpen: true }));
   }
 
-  handleSnackClose = () => {
-    this.setState({ snackOpen: false });
-  };
+  deleteSite = (siteId, token, uid) => {
+    Api.deleteSite(siteId, token, uid) 
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({ snackMessage: res.data.message });
+          setTimeout(() => window.location.href = "/", 2000);
+        } else {
+          this.setState({ snackMessage: res.data.message });
+        }
+      })
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
+      .finally(()    => this.setState({ snackOpen: true }));
+  }
 
   // --------------------------------------------------------------------------------------
   // Render Methods
@@ -275,7 +350,7 @@ class SiteInfo extends React.Component {
             value={this.state.siteInfo.owner}
           />
           <SiteInfoTextField
-            disabled={!this.state.authOwner}
+            disabled={!this.props.authSiteOwner}
             required={true}
             Icon={SiteIcon}
             id="siteName"
@@ -287,7 +362,7 @@ class SiteInfo extends React.Component {
             error={this.state.errors.siteName}
           />
           <SiteInfoTextField
-            disabled={!this.state.authOwner}
+            disabled={!this.props.authSiteOwner}
             required={true}
             Icon={SiteUrlIcon}
             id="siteUrl"
@@ -301,7 +376,7 @@ class SiteInfo extends React.Component {
           <Grid container alignItems="flex-end">
             <Grid item>
               <PeriodField
-                disabled={!this.state.authOwner}
+                disabled={!this.props.authSiteOwner}
                 c={c}
                 value={this.state.siteInfo.period}
                 error={this.state.errors.period}
@@ -310,7 +385,7 @@ class SiteInfo extends React.Component {
             </Grid>
             <Grid item>
               <PeriodUnitField
-                disabled={!this.state.authOwner}
+                disabled={!this.props.authSiteOwner}
                 c={c}
                 value={this.state.siteInfo.periodUnit}
                 onChange={(event)=>this.handlePeriodUnit(event)}
@@ -319,7 +394,7 @@ class SiteInfo extends React.Component {
             </Grid>
           </Grid>
           <UsedSkillsField
-            disabled={!this.state.authOwner}
+            disabled={!this.props.authSiteOwner}
             c={c}
             value={this.state.siteInfo.usedSkills}
             error={this.state.errors.usedSkills}
@@ -327,7 +402,7 @@ class SiteInfo extends React.Component {
             skills={this.state.skills}
           />
           <CommentField
-            disabled={!this.state.authOwner}
+            disabled={!this.props.authSiteOwner}
             c={c}
             value={this.state.siteInfo.comment}
             onChange={(event)=>this.handleComment(event)}
@@ -346,11 +421,13 @@ class SiteInfo extends React.Component {
         </form>
 
         {
-          this.state.authOwner ?
+          this.props.authSiteOwner ?
             <Actions
               c={c}
               siteInfo={this.state.siteInfo}
-              onClick={() => this.handleUpdate(this.state.siteInfo)}
+              onClickUpdate={() => this.handleUpdate(this.state.siteInfo)}
+              onClickDelete={() => this.handleDelete()}
+              mode={this.props.mode}
             />
             :
             ""
@@ -389,7 +466,7 @@ const styles = theme => {
     form: {
       display:   'flex',
       alignItems:'center',
-      marginBottom: 10,
+      marginBottom: 5,
     },
 
     formItem: {
@@ -428,6 +505,15 @@ const styles = theme => {
 
     periodFormLabel: {
       width: 120,
+    },
+
+    usedSkillsLabel: {
+      color:        'rgba(0, 0, 0, 0.54)',
+      padding:      0,
+      fontSize:     '0.8rem',
+      lineHeight:   1,
+      marginTop:    15,
+      marginBottom: 15,
     },
 
     commentForm: {
@@ -486,7 +572,7 @@ const PeriodField = ({disabled, c, value, error, onChange}) => {
       <div>
         <PeriodIcon className={c.icon}/>
       </div>
-      <div classNmae={c.formItem}>
+      <div className={c.formItem}>
         <TextField
           disabled={disabled}
           id="period"
@@ -593,15 +679,21 @@ const CommentField = ({disabled, c, value, onChange, error}) => {
   );
 }
 
-const Actions = ({c, siteInfo, onClick}) => {
+const Actions = ({c, siteInfo, onClickUpdate, onClickDelete, mode}) => {
   return (
     <CardActions className={c.infoActions}>
-      <Button size="small" color="primary" onClick={onClick}>
-        Update
+      <Button size="small" color="primary" onClick={onClickUpdate}>
+        { mode === 'register' ? 'Save' : 'Update' }
       </Button>
-      <Button size="small" color="primary">
-        Delete Site
-      </Button>
+      
+      { 
+        mode !== 'register' ?
+          <Button size="small" color="primary" onClick={onClickDelete}>
+            Delete Site
+          </Button>
+          :
+          ''
+      }
     </CardActions>
   );
 }

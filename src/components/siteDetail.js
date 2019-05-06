@@ -20,6 +20,8 @@ import PropTypes     from 'prop-types';
 import SiteScreenshot from './siteScreenshot';
 import SiteReaction   from './siteReaction';
 import SiteInfo       from './siteInfo';
+import * as Api       from '../lib/api';
+import * as Cmn       from '../lib/common';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -27,7 +29,13 @@ import SiteInfo       from './siteInfo';
 class SiteDetail extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      authSiteOwner:    false,
+      //user:         null,
+    };
     //site id {this.props.match.params.siteId}
+   
+    Cmn.authSiteOwner(this, props.siteId) 
   }
 
   // --------------------------------------------------------------------------------------
@@ -38,10 +46,20 @@ class SiteDetail extends React.Component {
     return (
       <Grid container className={c.containerGrid}>
         <Grid item xs={12} sm={12} md={8} className={c.screenshotGrid} >
-          <SiteScreenshot />
+          <SiteScreenshot
+            siteId={this.props.mode === 'register' ? null : this.props.match.params.siteId} 
+            authSiteOwner={this.state.authSiteOwner} 
+            user={this.props.user}
+            mode={this.props.mode}
+          />
         </Grid>
         <Grid item xs={12} sm={12} md={4} >
-          <SiteInfo siteId={this.props.match.params.siteId} />
+          <SiteInfo 
+            siteId={this.props.mode === 'register' ? null : this.props.match.params.siteId} 
+            authSiteOwner={this.state.authSiteOwner} 
+            user={this.props.user}
+            mode={this.props.mode}
+          />
         </Grid>
         {/*
         <Grid item xs={12} sm={12} md={8} className={c.siteReactionGrid} >

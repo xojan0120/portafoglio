@@ -1,0 +1,27 @@
+{
+  "status": 200,
+  "data": {
+  "message": "Success",
+  "userInfo": {
+    "nickname": "john smith",
+    "userName": "xojan0120",
+    "skills": [
+      { "value": "ruby",  "label": "ruby",  "level": 1 },
+      { "value": "rails", "label": "rails", "level": 2 },
+      { "value": "react", "label": "react", "level": 3 }
+    ],
+    "snses": [
+      { "twitter":  "xojan0120" },
+      { "facebook": "xojan0120" },
+      { "github":   "xojan0120" },
+      { "note":     "xojan" }
+    ],
+    "avatar": "https://www.ruby-lang.org/images/header-ruby-logo.png",
+    "sites": [
+      { "siteId": 1, "name": "site1", "comment": "comment1" },
+      { "siteId": 2, "name": "site2", "comment": "comment2" } 
+    ]
+  }
+}
+  
+}

@@ -6,7 +6,7 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import { withStyles } from '@material-ui/core/styles';
+//import { withStyles } from '@material-ui/core/styles';
 import withRoot       from '../withRoot';
 
 // -------------------------------------------------------------------------------------------------
@@ -29,11 +29,13 @@ import SiteList   from './siteList';
 import SiteDetail from './siteDetail';
 import NotFound   from './notFound';
 import SignIn     from './signIn';
+import UserDetail from './userDetail';
+import * as Cmn   from '../lib/common';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
 // -------------------------------------------------------------------------------------------------
-import styles from '../css/style'
+//import styles from '../css/style'
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -41,6 +43,11 @@ import styles from '../css/style'
 class App extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      user:      null,
+      isLoading: true,
+    };
+    Cmn.setUser(this);
   }
 
   // --------------------------------------------------------------------------------------
@@ -50,26 +57,32 @@ class App extends React.Component {
     console.log("run render!");
     return (
       <Router>
-        <MyAppBar />
+        <MyAppBar user={this.state.user} isLoading={this.state.isLoading} />
 
         <Switch>
           <Route exact path="/"
-            render={() => <Redirect to="/sites/new" />} />
+            render={()      => <Redirect to="/sites/new" />} />
 
           <Route exact path={["/sites/new", "/sites/new/:page"]}
             render={(match) => <SiteList order="new" {...match} />} />
 
-          <Route exact path={["/sites/random", "/sites/new/:random"]}
-            render={() => <SiteList order="random" />} />
+          <Route exact path={["/sites/random", "/sites/random/:page"]}
+            render={(match) => <SiteList order="random" {...match} />} />
+
+          <Route exact path="/sites/register"
+            render={()      => <SiteDetail user={this.state.user} mode="register" />} />
 
           <Route exact path="/about"
-            render={() => <About param="123" />} />
+            render={()      => <About param="123" />} />
 
           <Route exact path="/signin"
-            render={() => <SignIn />} />
+            render={()      => <SignIn />} />
 
           <Route exact path="/sites/:siteId/detail" 
-            render={(match) => <SiteDetail {...match} />} />
+            render={(match) => <SiteDetail {...match} user={this.state.user} />} />
+
+          <Route exact path="/users/:username/detail" 
+            render={(match) => <UserDetail {...match} user={this.state.user} />} />
 
           <Route component={NotFound} />
         </Switch>
@@ -82,15 +95,15 @@ class App extends React.Component {
 // --------------------------------------------------------------------------------------
 // PropTypes
 // --------------------------------------------------------------------------------------
-App.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+//App.propTypes = {
+//  classes: PropTypes.object.isRequired,
+//};
 
 // --------------------------------------------------------------------------------------
 // HOC
 // --------------------------------------------------------------------------------------
-const withStyleComponent = withStyles(styles)(App);    // CSS in JS適用
-const withRootComponent  = withRoot(withStyleComponent); // MuiTheme適用
+//const withStyleComponent = withStyles(styles)(App);    // CSS in JS適用
+const withRootComponent  = withRoot(App); // MuiTheme適用
 
 // --------------------------------------------------------------------------------------
 // Export Module

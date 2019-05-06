@@ -13,6 +13,7 @@ import CardActions       from '@material-ui/core/CardActions';
 import Button            from '@material-ui/core/Button';
 import AddPhotoAlternate from '@material-ui/icons/AddPhotoAlternate';
 import Typography        from '@material-ui/core/Typography';
+import Snackbar          from '@material-ui/core/Snackbar';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -25,6 +26,8 @@ import classNames    from 'classnames';
 // -------------------------------------------------------------------------------------------------
 import { Dropzone } from '../lib/common';
 import SiteReaction from './siteReaction';
+import * as Api     from '../lib/api';
+import * as Cmn     from '../lib/common';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -32,17 +35,78 @@ import SiteReaction from './siteReaction';
 class SiteScreenshot extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { screenshot: false };
+    this.state = {
+      screenshot:   false,
+      //authSiteOwner:    false,
+      snackOpen:    false,
+      snackMessage: '',
+      //user:         null,
+    };
+
+    if (this.props.mode !== 'register') {
+      Api.getSiteScreenshot(this.props.siteId)
+        .then (res   => { if (res.status === 200) this.setState({ screenshot: res.data.url }) })
+        .catch(error => console.log(error));
+    }
+
+    console.log(this.props.user);
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Event handlers and Related Methods
+  // --------------------------------------------------------------------------------------
+  handleUpload = (data) => {
+    if (this.props.user) {
+      if (this.props.mode === 'register') {
+        this.setState({ screenshot: data });
+      } else {
+        this.props.user.getIdToken(true)
+          .then (token => this.uploadSiteScreenshot(data, token, this.props.user.uid))
+          .catch(error => console.log(error));
+      }
+    }
+  }
+
+  handleDelete = () => {
+    console.log("run handleDelete!");
+    if (this.props.user) {
+      if (this.props.mode === 'register') {
+        this.setState({ screenshot: false });
+      } else {
+        this.props.user.getIdToken(true)
+          .then (token => this.deleteSiteScreenshot(this.props.siteId, token, this.props.user.uid))
+          .catch(error => console.log(error));
+      }
+    }
   }
 
   // --------------------------------------------------------------------------------------
   // Other Methods
   // --------------------------------------------------------------------------------------
-  upload = (data) => {
-    // do upload...
-    
-    console.log(data);
-    this.setState({ screenshot: true });
+  uploadSiteScreenshot = (data, token, uid) => {
+    if (this.props.mode === 'register') {
+      this.setState({ screenshot: data });
+    } else {
+      Api.uploadSiteScreenshot(data, token, uid)
+        .then(res => {
+          console.log(data);
+          if (res.status === 200) {
+            //this.setState({ screenshot: true });
+            this.setState({ screenshot: data });
+          }
+        })
+        .catch(error => console.log(error));
+    }
+  }
+
+  deleteSiteScreenshot = (siteId, token, uid) => {
+    Api.deleteSiteScreenshot(siteId, token, uid)
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({ screenshot: false });
+        }
+      })
+      .catch(error => console.log(error));
   }
 
   // --------------------------------------------------------------------------------------
@@ -54,9 +118,20 @@ class SiteScreenshot extends React.Component {
       <Card className={screenshotCardClass(c, this.state.screenshot)} >
         { 
           this.state.screenshot ?
-            <Screenshot c={c} callBack={data => this.upload(data)} />
+            <Screenshot 
+              c={c}
+              dataUrl={this.state.screenshot}
+              onUpload={data => this.handleUpload(data)}
+              onDelete={() => this.handleDelete()}
+              siteId={this.props.siteId}
+              user={this.props.user}
+              mode={this.props.mode}
+            />
             :
-            <Dropzone component={() => <NoImage c={c} />} callBack={data => this.upload(data)} />
+            <Dropzone 
+              component={() => <NoImage c={c} />} 
+              callBack={data => this.uploadSiteScreenshot(data)}
+            />
         }
       </Card>
     );
@@ -82,8 +157,9 @@ const styles = theme => {
     },
 
     screenshot: {
-      height: 'auto',
+      height: 690,
       width:  '100%',
+      objectFit: 'contain',
     },
 
     screenshotActions: {
@@ -92,6 +168,9 @@ const styles = theme => {
     },
 
     noImage: {
+      [theme.breakpoints.up('md')]: {
+        paddingTop: 100,
+      },
       textAlign: 'center',
     },
 
@@ -128,22 +207,23 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c, imageURL, callBack}) => {
+const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, mode}) => {
   return (
     <React.Fragment>
       <div>
-        <img className={c.screenshot} src="https://material-ui.com/static/images/cards/contemplative-reptile.jpg" />
+        {/* <img className={c.screenshot} src="https://material-ui.com/static/images/cards/contemplative-reptile.jpg" /> */}
+        <img className={c.screenshot} src={dataUrl} id="screenshot"/>
       </div>
 
       <CardActions className={c.screenshotActions}>
         <div>
-          <SiteReaction />
+          { mode === 'register' ? null : <SiteReaction siteId={siteId} user={user} /> }
         </div>
         <div>
           <Button size="small" color="primary">
-            <Dropzone caption="Change" callBack={callBack} />
+            <Dropzone caption="Change" callBack={onUpload} />
           </Button>
-          <Button size="small" color="primary">
+          <Button size="small" color="primary" onClick={onDelete}>
             Delete
           </Button>
         </div>
@@ -162,6 +242,9 @@ const NoImage = ({c}) => {
     </div>
   );
 }
+//      <div>
+//        <span style={{verticalAlign:"middle",display:"table-cell",height:500}}>hoge</span>
+//      </div>
 
 // --------------------------------------------------------------------------------------
 // Return css class names functions

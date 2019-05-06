@@ -20,8 +20,8 @@ import Avatar         from '@material-ui/core/Avatar';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-import PropTypes from 'prop-types';
-import { Link }  from 'react-router-dom';
+import PropTypes                from 'prop-types';
+import { Link }                 from 'react-router-dom';
 import { FaGithub as NoAvatar } from 'react-icons/fa';
 
 // -------------------------------------------------------------------------------------------------
@@ -37,16 +37,16 @@ class MyAppBar extends React.Component {
     super(props);
     this.state = {
       anchorEl:  null,
-      user:      null,
-      isLoading: true,
+      //user:      null,
+      //isLoading: true,
     };
 
-    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-      this.setState({
-        user:      user,
-        isLoading: false,
-      });
-    });
+    //FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+    //  this.setState({
+    //    //user:      user,
+    //    isLoading: false,
+    //  });
+    //});
   }
 
   // --------------------------------------------------------------------------------------
@@ -72,11 +72,11 @@ class MyAppBar extends React.Component {
 
           <MenuListForLg c={c} />
 
-          <SignInOut c={c} user={this.state.user} isLoading={this.state.isLoading}/>
+          <SignInOut c={c} user={this.props.user} isLoading={this.props.isLoading} />
           <MenuIconForSm c={c} anchorEl={this.state.anchorEl} openMenu={this.openMenu} />
         </Toolbar>
 
-        <MenuListForSm user={this.state.user} anchorEl={this.state.anchorEl} closeMenu={this.closeMenu} />
+        <MenuListForSm user={this.props.user} anchorEl={this.state.anchorEl} closeMenu={this.closeMenu} />
       </AppBar>
     );
   }
@@ -201,9 +201,17 @@ const SignInOut = ({c, user, isLoading}) => {
       {
         user ?
           user.photoURL ?
-            <Avatar alt={user.displayName} src={user.photoURL} className={c.avatar} />
+            <Avatar
+              alt={user.displayName}
+              src={user.photoURL}
+              className={c.avatar}
+              component={Link} to={'/users/' + user.uid + '/detail'}
+            />
             :
-            <NoAvatar className={c.avatarIcon} />
+            <NoAvatar 
+              className={c.avatarIcon}
+              component={Link} to={'/users/' + user.uid + '/detail'}
+            />
           :
           <AccountCircle className={c.avatarIcon} />
       }

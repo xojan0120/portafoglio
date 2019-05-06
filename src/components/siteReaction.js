@@ -21,6 +21,7 @@ import {
   FaGrinSquint  as FunnyIcon,
   FaEye         as ViewIcon,
 }                from 'react-icons/fa';
+import update    from 'immutability-helper';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -40,6 +41,8 @@ class SiteReaction extends React.Component {
       },
       view: 0,
     }
+
+    Api.updateViewCount(this.props.siteId);
   }
 
   // --------------------------------------------------------------------------------------
@@ -67,13 +70,44 @@ class SiteReaction extends React.Component {
   }
 
   // --------------------------------------------------------------------------------------
+  // * Event handlers and Related Methods
+  // --------------------------------------------------------------------------------------
+  handleUpdate = (reaction) => {
+    if (this.props.user) {
+      this.props.user.getIdToken(true)
+        .then (token => this.updateReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
+        .catch(error => console.log(error));
+    }
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Other Methods
+  // --------------------------------------------------------------------------------------
+  updateReactionCount = (siteId, reaction, token, uid) => {
+    Api.updateReactionCount(siteId, reaction, token, uid)
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            reactions: update(this.state.reactions, { good: {$set: res.data.count} }),
+          });
+        }
+      })
+      .catch(error => console.log(error));
+  }
+
+  // --------------------------------------------------------------------------------------
   // Render Methods
   // --------------------------------------------------------------------------------------
   render() {
     const c = this.props.classes;
     return (
       <div>
-        <Button variant="contained" color="default" className={c.reactionButton}>
+        <Button 
+          variant="contained"
+          color="default"
+          className={c.reactionButton}
+          onClick={() => this.handleUpdate('good')}
+        >
           <GoodIcon className={c.reactionIcon} />{this.state.reactions.good}
         </Button>
         {/*
