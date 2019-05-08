@@ -37,13 +37,13 @@ class SiteScreenshot extends React.Component {
     super(props);
     this.state = {
       screenshot:   false,
-      //authSiteOwner:    false,
+      //isMine: false,
       snackOpen:    false,
       snackMessage: '',
       //user:         null,
     };
 
-    if (this.props.mode !== 'register') {
+    if (!this.props.isRegistration) {
       Api.getSiteScreenshot(this.props.siteId)
         .then (res   => { if (res.status === 200) this.setState({ screenshot: res.data.url }) })
         .catch(error => console.log(error));
@@ -57,7 +57,7 @@ class SiteScreenshot extends React.Component {
   // --------------------------------------------------------------------------------------
   handleUpload = (data) => {
     if (this.props.user) {
-      if (this.props.mode === 'register') {
+      if (this.props.isRegistration) {
         this.setState({ screenshot: data });
       } else {
         this.props.user.getIdToken(true)
@@ -70,7 +70,7 @@ class SiteScreenshot extends React.Component {
   handleDelete = () => {
     console.log("run handleDelete!");
     if (this.props.user) {
-      if (this.props.mode === 'register') {
+      if (this.props.isRegistration) {
         this.setState({ screenshot: false });
       } else {
         this.props.user.getIdToken(true)
@@ -84,7 +84,7 @@ class SiteScreenshot extends React.Component {
   // Other Methods
   // --------------------------------------------------------------------------------------
   uploadSiteScreenshot = (data, token, uid) => {
-    if (this.props.mode === 'register') {
+    if (this.props.isRegistration) {
       this.setState({ screenshot: data });
     } else {
       Api.uploadSiteScreenshot(data, token, uid)
@@ -125,7 +125,8 @@ class SiteScreenshot extends React.Component {
               onDelete={() => this.handleDelete()}
               siteId={this.props.siteId}
               user={this.props.user}
-              mode={this.props.mode}
+              isRegistration={this.props.isRegistration}
+              isMine={this.props.isMine}
             />
             :
             <Dropzone 
@@ -144,12 +145,13 @@ class SiteScreenshot extends React.Component {
 const styles = theme => {
   return ({
     screenshotCard: {
-      [theme.breakpoints.down('sm')]: {
-        height: '100%',
-      },
-      [theme.breakpoints.up('md')]: {
-        height: 750,
-      },
+      //[theme.breakpoints.down('sm')]: {
+      //  height: '100%',
+      //},
+      //[theme.breakpoints.up('md')]: {
+      //  height: 750,
+      //},
+      height: '90vh',
     },
 
     pointer: {
@@ -207,7 +209,7 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, mode}) => {
+const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, isRegistration, isMine}) => {
   return (
     <React.Fragment>
       <div>
@@ -217,16 +219,21 @@ const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, mode}) => {
 
       <CardActions className={c.screenshotActions}>
         <div>
-          { mode === 'register' ? null : <SiteReaction siteId={siteId} user={user} /> }
+          { isRegistration ? null : <SiteReaction siteId={siteId} user={user} /> }
         </div>
-        <div>
-          <Button size="small" color="primary">
-            <Dropzone caption="Change" callBack={onUpload} />
-          </Button>
-          <Button size="small" color="primary" onClick={onDelete}>
-            Delete
-          </Button>
-        </div>
+        { 
+          isMine ?
+            <div>
+              <Button size="small" color="primary">
+                <Dropzone caption="Change" callBack={onUpload} />
+              </Button>
+              <Button size="small" color="primary" onClick={onDelete}>
+                Delete
+              </Button>
+            </div>
+            :
+            null
+        }
       </CardActions>
     </React.Fragment>
   );

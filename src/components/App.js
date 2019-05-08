@@ -29,13 +29,15 @@ import SiteList   from './siteList';
 import SiteDetail from './siteDetail';
 import NotFound   from './notFound';
 import SignIn     from './signIn';
-import UserDetail from './userDetail';
+import UserPage   from './userPage';
 import * as Cmn   from '../lib/common';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(CSS)
 // -------------------------------------------------------------------------------------------------
 //import styles from '../css/style'
+
+import firebase from 'firebase';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -55,34 +57,30 @@ class App extends React.Component {
   // --------------------------------------------------------------------------------------
   render() {
     console.log("run render!");
+    const { user, isLoading } = this.state;
     return (
       <Router>
-        <MyAppBar user={this.state.user} isLoading={this.state.isLoading} />
+        <MyAppBar user={user} isLoading={isLoading} />
 
         <Switch>
           <Route exact path="/"
-            render={()      => <Redirect to="/sites/new" />} />
+            render={()      => <Redirect to="/sites" />} />
 
-          <Route exact path={["/sites/new", "/sites/new/:page"]}
-            render={(match) => <SiteList order="new" {...match} />} />
+          <Route exact path="/sites"
+            render={()      => <SiteList />} />
 
-          <Route exact path={["/sites/random", "/sites/random/:page"]}
-            render={(match) => <SiteList order="random" {...match} />} />
-
-          <Route exact path="/sites/register"
-            render={()      => <SiteDetail user={this.state.user} mode="register" />} />
-
-          <Route exact path="/about"
-            render={()      => <About param="123" />} />
+          <PrivateRoute exact path="/sites/register" 
+            user={user} isLoading={isLoading} redirectTo="/sites"
+            render={()      => <SiteDetail user={user} isRegistration={true} />} />
 
           <Route exact path="/signin"
             render={()      => <SignIn />} />
 
           <Route exact path="/sites/:siteId/detail" 
-            render={(match) => <SiteDetail {...match} user={this.state.user} />} />
+            render={(match) => <SiteDetail {...match} user={user} />} />
 
-          <Route exact path="/users/:username/detail" 
-            render={(match) => <UserDetail {...match} user={this.state.user} />} />
+          <Route exact path="/users/:uid/detail" 
+            render={(match) => <UserPage   {...match} user={user} isLoading={isLoading} />} />
 
           <Route component={NotFound} />
         </Switch>
@@ -92,18 +90,19 @@ class App extends React.Component {
   }
 }
 
-// --------------------------------------------------------------------------------------
-// PropTypes
-// --------------------------------------------------------------------------------------
-//App.propTypes = {
-//  classes: PropTypes.object.isRequired,
-//};
+const PrivateRoute = (props) => {
+  const { user, isLoading, redirectTo } = props;
+  if (!isLoading) {
+    return user ? <Route {...props} /> : <Redirect to={redirectTo} />;
+  } else {
+    return null; // これがないとローディング中に何もレンダリングされないページが表示されて止まる
+  }
+}
 
 // --------------------------------------------------------------------------------------
-// HOC
+// MuiTheme適用
 // --------------------------------------------------------------------------------------
-//const withStyleComponent = withStyles(styles)(App);    // CSS in JS適用
-const withRootComponent  = withRoot(App); // MuiTheme適用
+const withRootComponent  = withRoot(App);
 
 // --------------------------------------------------------------------------------------
 // Export Module

@@ -22,7 +22,7 @@ export default (successCallback, failureCallback) => {
       //uiShown: () => document.getElementById('loader').style.display = 'none',
     },
     signInFlow: 'redirect',
-    signInSuccessUrl: '/',
+    //signInSuccessUrl: '/', // redirectはsinIn.jsの中で記述
     signInOptions: [
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,

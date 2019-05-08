@@ -6,7 +6,6 @@ import React, {useCallback} from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import { withStyles } from '@material-ui/core/styles';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -18,7 +17,6 @@ import {useDropzone}            from 'react-dropzone'
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import styles   from '../css/style'
 import * as Api from './api';
 
 // -------------------------------------------------------------------------------------------------
@@ -49,17 +47,37 @@ export const setUser = (self) => {
   });
 }
 
-export const authSiteOwner = (self, siteId) => {
+export const judgeSite = (self, siteId) => {
   FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
     if(user) {
       user.getIdToken(true)
         .then (token => {
-          Api.authSiteOwner(siteId, token)
+          Api.judgeSite(siteId, token)
             .then(res => {
               if (res.status === 200 && res.data.result === "true") {
-                self.setState({ authSiteOwner: true });
+                self.setState({ isMine: true });
               } else {
-                self.setState({ authSiteOwner: false });
+                self.setState({ isMine: false });
+              }
+            })
+            .catch(error => console.log(error));
+        })
+        .catch(error => console.log(error) );
+    }
+  });
+}
+
+export const judgeUser = (self, uid) => {
+  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+    if(user) {
+      user.getIdToken(true)
+        .then (token => {
+          Api.judgeUser(uid, token)
+            .then(res => {
+              if (res.status === 200 && res.data.result === "true") {
+                self.setState({ isMe: true });
+              } else {
+                self.setState({ isMe: false });
               }
             })
             .catch(error => console.log(error));
@@ -98,17 +116,13 @@ export const authSiteOwner = (self, siteId) => {
 // ----------------------------------------------------------------------------------------
 // * Common Component
 // ----------------------------------------------------------------------------------------
-const LoaderBoxWithoutStyles = (props) => {
+export const LoaderBox = (props) => {
   return (
-    <div className={props.classes.loaderBox}>
+    <div style={{marginTop: 30, textAlign: 'center'}}>
       <Loader margin="10px" size={30} color="#36D7B7"/>
     </div>
   );
 }
-export const LoaderBox = withStyles(styles)(LoaderBoxWithoutStyles);
-LoaderBoxWithoutStyles.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
 export const Dropzone = ({caption, component, callBack}) => {
   const Component = component;

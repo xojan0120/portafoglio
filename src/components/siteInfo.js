@@ -34,18 +34,18 @@ import dateFormat      from 'dateformat';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import * as Api from '../lib/api';
+import * as Api       from '../lib/api';
 import '../css/common.scss';
 import {
-  cmnValidOwnerLength,
   cmnValidSiteNameLength,
   cmnValidSiteUrlLength,
   cmnValidCreationPeriodMin,
   cmnValidCreationPeriodMax,
   cmnValidUsedSkillsQuantity,
   cmnValidCommentLength,
-}               from '../lib/constants';
-import * as Cmn from '../lib/common';
+}                    from '../lib/constants';
+import * as Cmn      from '../lib/common';
+import { LoaderBox } from '../lib/common';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Firebase)
@@ -70,7 +70,7 @@ class SiteInfo extends React.Component {
         periodUnit: 'day',
         usedSkills: [],
         comment:    '',
-        updateAt:   this.props.mode === 'register' ? now : '',
+        updateAt:   this.props.isRegistration ? now : '',
       },
       errors: {
         owner:      false,
@@ -82,7 +82,7 @@ class SiteInfo extends React.Component {
       },
       periodUnits:  [],
       skills:       [],
-      //authSiteOwner:    false,
+      //isMine:    false,
       snackOpen:    false,
       snackMessage: '',
       //user:         null,
@@ -133,18 +133,18 @@ class SiteInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   getPeriodUnits = () => {
     Api.getPeriodUnits()
-      .then(res => { if (res.status === 200) this.setState({ periodUnits: res.data.periodUnits }) })
+      .then(res => this.setState({ periodUnits: res.data.periodUnits }) )
       .catch(error => console.log(error));
   }
 
   getSkills = () => {
     Api.getSkills()
-      .then(res => { if (res.status === 200) this.setState({ skills: res.data.skills }) })
+      .then(res => this.setState({ skills: res.data.skills }) )
       .catch(error => console.log(error));
   }
 
   getSiteInfo = (siteId) => {
-    if (this.props.mode === 'register') {
+    if (this.props.isRegistration) {
       FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
         if (user) {
           Api.getUsername(user.uid)
@@ -158,7 +158,7 @@ class SiteInfo extends React.Component {
       });
     } else {
       Api.getSiteInfo(siteId)
-        .then(res => { if (res.status === 200) this.setState({ siteInfo: res.data.siteInfo }) })
+        .then(res => this.setState({ siteInfo: res.data.siteInfo }) )
         .catch(error => console.log(error));
     }
   }
@@ -350,7 +350,7 @@ class SiteInfo extends React.Component {
             value={this.state.siteInfo.owner}
           />
           <SiteInfoTextField
-            disabled={!this.props.authSiteOwner}
+            disabled={!this.props.isMine}
             required={true}
             Icon={SiteIcon}
             id="siteName"
@@ -362,7 +362,7 @@ class SiteInfo extends React.Component {
             error={this.state.errors.siteName}
           />
           <SiteInfoTextField
-            disabled={!this.props.authSiteOwner}
+            disabled={!this.props.isMine}
             required={true}
             Icon={SiteUrlIcon}
             id="siteUrl"
@@ -376,7 +376,7 @@ class SiteInfo extends React.Component {
           <Grid container alignItems="flex-end">
             <Grid item>
               <PeriodField
-                disabled={!this.props.authSiteOwner}
+                disabled={!this.props.isMine}
                 c={c}
                 value={this.state.siteInfo.period}
                 error={this.state.errors.period}
@@ -385,7 +385,7 @@ class SiteInfo extends React.Component {
             </Grid>
             <Grid item>
               <PeriodUnitField
-                disabled={!this.props.authSiteOwner}
+                disabled={!this.props.isMine}
                 c={c}
                 value={this.state.siteInfo.periodUnit}
                 onChange={(event)=>this.handlePeriodUnit(event)}
@@ -394,7 +394,7 @@ class SiteInfo extends React.Component {
             </Grid>
           </Grid>
           <UsedSkillsField
-            disabled={!this.props.authSiteOwner}
+            disabled={!this.props.isMine}
             c={c}
             value={this.state.siteInfo.usedSkills}
             error={this.state.errors.usedSkills}
@@ -402,7 +402,7 @@ class SiteInfo extends React.Component {
             skills={this.state.skills}
           />
           <CommentField
-            disabled={!this.props.authSiteOwner}
+            disabled={!this.props.isMine}
             c={c}
             value={this.state.siteInfo.comment}
             onChange={(event)=>this.handleComment(event)}
@@ -421,13 +421,13 @@ class SiteInfo extends React.Component {
         </form>
 
         {
-          this.props.authSiteOwner ?
+          this.props.isMine ?
             <Actions
               c={c}
               siteInfo={this.state.siteInfo}
               onClickUpdate={() => this.handleUpdate(this.state.siteInfo)}
               onClickDelete={() => this.handleDelete()}
-              mode={this.props.mode}
+              isRegistration={this.props.isRegistration}
             />
             :
             ""
@@ -455,12 +455,14 @@ const styles = theme => {
       paddingLeft:  10,
       paddingRight: 30,
 
-      [theme.breakpoints.down('sm')]: {
-        height:     '100%',
-      },
-      [theme.breakpoints.up('md')]: {
-        height:     750,
-      },
+      height: '90vh',
+
+      //[theme.breakpoints.down('sm')]: {
+      //  height:     '100%',
+      //},
+      //[theme.breakpoints.up('md')]: {
+      //  height:     750,
+      //},
     },
 
     form: {
@@ -679,20 +681,20 @@ const CommentField = ({disabled, c, value, onChange, error}) => {
   );
 }
 
-const Actions = ({c, siteInfo, onClickUpdate, onClickDelete, mode}) => {
+const Actions = ({c, siteInfo, onClickUpdate, onClickDelete, isRegistration}) => {
   return (
     <CardActions className={c.infoActions}>
       <Button size="small" color="primary" onClick={onClickUpdate}>
-        { mode === 'register' ? 'Save' : 'Update' }
+        { isRegistration ? 'Save' : 'Update' }
       </Button>
       
       { 
-        mode !== 'register' ?
+        !isRegistration ?
           <Button size="small" color="primary" onClick={onClickDelete}>
             Delete Site
           </Button>
           :
-          ''
+          null
       }
     </CardActions>
   );

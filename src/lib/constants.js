@@ -1,4 +1,4 @@
-export const cmnValidOwnerLength        = parseInt(process.env.REACT_APP_VALID_OWNER_LENGTH);
+export const cmnValidNicknameLength     = parseInt(process.env.REACT_APP_VALID_NICKNAME_LENGTH);
 export const cmnValidSiteNameLength     = parseInt(process.env.REACT_APP_VALID_SITE_NAME_LENGTH);
 export const cmnValidSiteUrlLength      = parseInt(process.env.REACT_APP_VALID_SITE_URL_LENGTH);
 export const cmnValidCreationPeriodMin  = parseInt(process.env.REACT_APP_VALID_CREATION_PERIOD_MIN);

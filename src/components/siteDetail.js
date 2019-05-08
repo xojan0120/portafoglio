@@ -13,6 +13,7 @@ import { withStyles } from '@material-ui/core/styles';
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
 import PropTypes     from 'prop-types';
+import { Redirect }  from 'react-router-dom';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -22,6 +23,8 @@ import SiteReaction   from './siteReaction';
 import SiteInfo       from './siteInfo';
 import * as Api       from '../lib/api';
 import * as Cmn       from '../lib/common';
+import { LoaderBox }  from '../lib/common';
+import NotFound       from './notFound';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -30,12 +33,22 @@ class SiteDetail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      authSiteOwner:    false,
-      //user:         null,
+      isMine:     false,
+      isChecking: true,
+      isNotFound: false,
     };
-    //site id {this.props.match.params.siteId}
-   
-    Cmn.authSiteOwner(this, props.siteId) 
+
+    Cmn.judgeSite(this, props.match.params.siteId) 
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    console.log("run componentDidMount!");
+    Api.checkSite(this.props.match.params.siteId)
+      .then (res   => this.setState({ isChecking: false, isNotFound: false }))
+      .catch(error => this.setState({ isChecking: false, isNotFound: true  }));
   }
 
   // --------------------------------------------------------------------------------------
@@ -44,29 +57,30 @@ class SiteDetail extends React.Component {
   render() {
     const c = this.props.classes;
     return (
-      <Grid container className={c.containerGrid}>
-        <Grid item xs={12} sm={12} md={8} className={c.screenshotGrid} >
-          <SiteScreenshot
-            siteId={this.props.mode === 'register' ? null : this.props.match.params.siteId} 
-            authSiteOwner={this.state.authSiteOwner} 
-            user={this.props.user}
-            mode={this.props.mode}
-          />
-        </Grid>
-        <Grid item xs={12} sm={12} md={4} >
-          <SiteInfo 
-            siteId={this.props.mode === 'register' ? null : this.props.match.params.siteId} 
-            authSiteOwner={this.state.authSiteOwner} 
-            user={this.props.user}
-            mode={this.props.mode}
-          />
-        </Grid>
-        {/*
-        <Grid item xs={12} sm={12} md={8} className={c.siteReactionGrid} >
-          <SiteReaction />
-        </Grid>
-        */}
-      </Grid>
+      this.state.isChecking ?
+        <LoaderBox />
+        :
+        this.state.isNotFound ?
+          <NotFound />
+          :
+          <Grid container className={c.containerGrid}>
+            <Grid item xs={12} sm={12} md={8} className={c.screenshotGrid} >
+              <SiteScreenshot
+                siteId={this.props.isRegistration ? null : this.props.match.params.siteId} 
+                isMine={this.state.isMine} 
+                user={this.props.user}
+                isRegistration={this.props.isRegistration}
+              />
+            </Grid>
+            <Grid item xs={12} sm={12} md={4} >
+              <SiteInfo 
+                siteId={this.props.isRegistration ? null : this.props.match.params.siteId} 
+                isMine={this.state.isMine} 
+                user={this.props.user}
+                isRegistration={this.props.isRegistration}
+              />
+            </Grid>
+          </Grid>
     );
   }
 }

@@ -50,22 +50,22 @@ class SiteReaction extends React.Component {
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
     console.log("run componentDidMount!");
-    this.getReactionsCount();
-    this.getViewCount();
+    this.getReactionsCount(this.props.siteId);
+    this.getViewCount(this.props.siteId);
   }
 
   // --------------------------------------------------------------------------------------
   // Other Methods
   // --------------------------------------------------------------------------------------
-  getReactionsCount = () => {
-    Api.getReactionsCount()
-      .then (res   => { if (res.status === 200) this.setState({ reactions: res.data.reactions }) })
+  getReactionsCount = (siteId) => {
+    Api.getReactionsCount(siteId)
+      .then (res   => this.setState({ reactions: res.data.reactions }) )
       .catch(error => console.log(error));
   }
 
-  getViewCount = () => {
-    Api.getViewCount()
-      .then (res   => { if (res.status === 200) this.setState({ view: res.data.view }) })
+  getViewCount = (siteId) => {
+    Api.getViewCount(siteId)
+      .then (res   => this.setState({ view: res.data.view }) )
       .catch(error => console.log(error));
   }
 

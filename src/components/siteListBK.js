@@ -5,15 +5,13 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import Button from '@material-ui/core/Button';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-import InfiniteScroll              from 'react-infinite-scroller';
-import { Link }                    from 'react-router-dom';
-import pathParse                   from 'path-parse';
-import { FaPlusSquare as AddIcon } from 'react-icons/fa';
+import InfiniteScroll from 'react-infinite-scroller';
+import { withRouter } from 'react-router-dom';
+import pathParse      from 'path-parse';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
@@ -31,6 +29,7 @@ class SiteList extends React.Component {
     this.state = {
       list:         [],
       hasMoreItems: true,
+      page:         this.getPage(this.props.location.pathname),
     };
   }
 
@@ -39,26 +38,43 @@ class SiteList extends React.Component {
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
     console.log("run componentDidMount!");
+    this.getSiteList(this.state.page, this.props.uid);
   }
 
   // --------------------------------------------------------------------------------------
   // Other Methods
   // --------------------------------------------------------------------------------------
+  getPage = (path) => {
+    let page = parseInt(pathParse(path).base);
+    if (Number.isNaN(page)) {
+      page = 1;
+    }
+    return page;
+  }
+
   getSiteList = (page, uid) => {
     Api.getSiteList(page, uid)
       .then(res => {
-        const newList = this.state.list.concat(res.data.list);
-        this.setState({ list: newList });
+        if (res.status === 200) {
+          const newList = this.state.list.concat(res.data.list);
+          this.setState({ list: newList });
+
+          if (!uid) {
+            this.props.history.push(`/sites/${page}`);
+            console.log("hoge");
+          }
+          this.setState({ page: page });
+        } else {
+          this.setState({ hasMoreItems: false });
+        }
       })
-      .catch(error => {
-        this.setState({ hasMoreItems: false });
-      });
+      .catch(error => console.log(error));
   }
 
   getLoadMore = (page) => {
+    debugger;
     console.log("run getLoadMore!");
-    this.getSiteList(page, this.props.uid);
-    console.log(page);
+    this.getSiteList(page + 1, this.props.uid);
   }
 
   // --------------------------------------------------------------------------------------
@@ -74,20 +90,17 @@ class SiteList extends React.Component {
 
   render = () => {
     return (
-      <div>
-        { this.props.uid ? <Button variant="contained" component={Link} to="/sites/register">Site add</Button> : null }
-        <InfiniteScroll
-          initialLoad={true}
-          loadMore={(page)=>this.getLoadMore(page)}
-          hasMore={this.state.hasMoreItems} // hasMoreがtrueになるとデータを追加ロードするためのscrollイベントが除去される。
-          loader={<LoaderBox key={0} />} // keyが必要。公式ドキュメントにも記載有り。https://github.com/CassetteRocks/react-infinite-scroller#props
-          threshold={10}
-        >
-          <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start'}}>
-            {this.renderList()}
-          </div>
-        </InfiniteScroll>
-      </div>
+      <InfiniteScroll
+        initialLoad={false}
+        loadMore={()=>this.getLoadMore(this.state.page)}
+        hasMore={this.state.hasMoreItems} // hasMoreがtrueになるとデータを追加ロードするためのscrollイベントが除去される。
+        loader={<LoaderBox key={0}/>} // keyが必要。公式ドキュメントにも記載有り。https://github.com/CassetteRocks/react-infinite-scroller#props
+        threshold={10}
+      >
+        <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start'}}>
+          {this.renderList()}
+        </div>
+      </InfiniteScroll>
     );
   }
 }
@@ -95,4 +108,4 @@ class SiteList extends React.Component {
 // --------------------------------------------------------------------------------------
 // Export Module
 // --------------------------------------------------------------------------------------
-export default SiteList;
+export default withRouter(SiteList);

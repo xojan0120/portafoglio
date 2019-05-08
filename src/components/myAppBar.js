@@ -70,13 +70,9 @@ class MyAppBar extends React.Component {
         <Toolbar className={c.toolbar}>
           <SiteTitle c={c} />
 
-          <MenuListForLg c={c} />
-
           <SignInOut c={c} user={this.props.user} isLoading={this.props.isLoading} />
-          <MenuIconForSm c={c} anchorEl={this.state.anchorEl} openMenu={this.openMenu} />
         </Toolbar>
 
-        <MenuListForSm user={this.props.user} anchorEl={this.state.anchorEl} closeMenu={this.closeMenu} />
       </AppBar>
     );
   }
@@ -117,20 +113,6 @@ const styles = theme => {
     toolbar: {
       //paddingTop: 10,
     },
-
-    // 幅600px以上の場合に非表示
-    hideLg: {
-      '@media screen and (min-width:600px)': { display: 'none' }
-    },
-
-    // 幅600px未満の場合に非表示
-    hideSm: {
-      '@media screen and (max-width:599px)': { display: 'none' }
-    },
-
-    menuIconForSm: {
-      marginLeft: 10,
-    },
   });
 }
 
@@ -158,43 +140,6 @@ const SiteTitle = ({c}) => {
   );
 }
 
-const MenuIconForSm = ({c, anchorEl, openMenu}) => {
-  return (
-    <MenuIcon
-      className={c.hideLg + " " + c.menuIconForSm}
-      aria-owns={anchorEl ? 'simple-menu' : undefined}
-      aria-haspopup="true"
-      onClick={(event)=>openMenu(event)}
-    />
-  );
-}
-
-const MenuListForLg = ({c}) => {
-  return (
-    <div className={c.hideSm}>
-      <Button color="inherit" component={Link} to="/about">About</Button>
-      <Button color="inherit" component={Link} to="/sites/new">New</Button>
-      <Button color="inherit" component={Link} to="/sites/random">Random</Button>
-    </div>
-  );
-}
-
-const MenuListForSm = ({user, anchorEl, closeMenu}) => {
-  return (
-    <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={()=>closeMenu()} >
-      <MenuItem component={Link} to="/about"        onClick={()=>closeMenu()}>About</MenuItem>
-      <MenuItem component={Link} to="/sites/new"    onClick={()=>closeMenu()}>New</MenuItem>
-      <MenuItem component={Link} to="/sites/random" onClick={()=>closeMenu()}>Random</MenuItem>
-      {
-        user ?
-        <MenuItem component={Link} to="/" onClick={()=>{FirebaseAuth.signOut();closeMenu()}}>Sign out</MenuItem>
-          :
-        <MenuItem component={Link} to="/signin" onClick={()=>closeMenu()}>Sign in</MenuItem>
-      }
-    </Menu>
-  );
-}
-
 const SignInOut = ({c, user, isLoading}) => {
   return (
     <div className={c.login} style={{visibility: isLoading ? "hidden" : "visible"}}>
@@ -216,7 +161,7 @@ const SignInOut = ({c, user, isLoading}) => {
           <AccountCircle className={c.avatarIcon} />
       }
 
-      <span className={c.hideSm}>
+      <span>
       { 
         user ?
           <Button color="inherit" component={Link} to="/" onClick={()=>FirebaseAuth.signOut()} >Sign out</Button>
