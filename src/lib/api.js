@@ -23,7 +23,6 @@ import testGetReactionsCount  from '../test_data/get/reactionsCount.json';
 import testGetViewCount       from '../test_data/get/viewCount.json';
 import testGetSiteInfo        from '../test_data/get/siteInfo.json';
 import testGetAuthSiteOwner   from '../test_data/get/authSiteOwner.json';
-import testGetSiteScreenshot  from '../test_data/get/siteScreenshot.json';
 import testGetUserInfo        from '../test_data/get/userInfo.json';
 import testGetUsername        from '../test_data/get/username.json';
 
@@ -130,23 +129,17 @@ export const getSkills = () => {
 
 export const getReactionsCount = (siteId) => {
   return ajax.get(`/sites/${siteId}/reactions`);
-
-  //const promise = new Promise((resolve, reject) => {
-  //  setTimeout(()=> {
-  //    resolve(testGetReactionsCount);
-  //  },1000);
-  //});
-  //return promise;
 }
 
 export const updateReactionCount = (siteId, reaction, token, uid) => {
   withAuthorizationHeader(token)
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testPostSiteReaction);
-    },1000);
-  });
-  return promise;
+  return ajax.post(`/sites/${siteId}/reactions`, { reaction: reaction, uid: uid });
+}
+
+export const checkReactionCount = (siteId, reaction, token, uid) => {
+  withAuthorizationHeader(token)
+  const data = { params: { reaction: reaction, uid: uid } };
+  return ajax.get(`/sites/${siteId}/reactions/check`, data);
 }
 
 export const getViewCount = (siteId) => {
@@ -225,55 +218,28 @@ export const judgeSite = (siteId, uid, token) => {
 }
 
 export const getSiteScreenshot = (siteId) => {
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testGetSiteScreenshot);
-    },1000);
-  });
-  return promise;
+  return ajax.get(`/sites/${siteId}/screenshot`);
 }
 
-export const uploadSiteScreenshot = (data, token, uid) => {
+export const updateSiteScreenshot = (siteId, data, token, uid) => {
   withAuthorizationHeader(token)
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testPostSiteScreenshot);
-    },1000);
-  });
-  return promise;
+  return ajax.post(`/sites/${siteId}/screenshot`, { screenshot: data, uid: uid });
 }
 
 export const deleteSiteScreenshot = (siteId, token, uid) => {
   withAuthorizationHeader(token)
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testDeleteSiteScreenshot);
-    },1000);
-  });
-  return promise;
+  const data = { params: {uid: uid} };
+  return ajax.delete(`/sites/${siteId}/screenshot`, data);
 }
 
-export const updateSiteInfo = (data, token, uid) => {
+export const updateSiteInfo = (siteId, data, token, uid) => {
   withAuthorizationHeader(token)
-  
-  //const promise = new Promise((resolve, reject) => {
-  //  setTimeout(()=> {
-  //    resolve(testPostSiteInfo);
-  //  },1000);
-  //});
-  //return promise;
+  return ajax.post(`/sites/${siteId}/info`, Object.assign(data, {uid: uid}));
+}
 
-  const promise = ajax.post('/items/auth3', Object.assign(data, {uid: uid}));
-  promise
-    .then(res => {
-      console.log(res);
-      console.log(res.status);
-      console.log(res.data.message);
-    })
-    .catch(error => {
-      console.log(error.message);
-    });
-  return promise;
+export const createSiteInfo = (data, token, uid) => {
+  withAuthorizationHeader(token)
+  return ajax.post(`/sites/info`, Object.assign(data, {uid: uid}));
 }
 
 export const deleteSite = (siteId, token, uid) => {
@@ -338,8 +304,7 @@ export const deleteAccount = (uid, token) => {
 
 export const createAccount = (token, uid) => {
   withAuthorizationHeader(token)
-  const data = {uid: uid}
-  return ajax.post('/accounts', data);
+  return ajax.post('/accounts', {uid: uid});
 }
 
 export const checkSite = (siteId) => {

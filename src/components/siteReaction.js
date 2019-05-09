@@ -40,9 +40,10 @@ class SiteReaction extends React.Component {
         good: 0,
       },
       view: 0,
+      check: {
+        good: false,
+      }
     }
-
-    Api.updateViewCount(this.props.siteId);
   }
 
   // --------------------------------------------------------------------------------------
@@ -50,8 +51,28 @@ class SiteReaction extends React.Component {
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
     console.log("run componentDidMount!");
+    Api.updateViewCount(this.props.siteId);
     this.getReactionsCount(this.props.siteId);
     this.getViewCount(this.props.siteId);
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Event handlers and Related Methods
+  // --------------------------------------------------------------------------------------
+  handleUpdate = (reaction) => {
+    if (this.props.user) {
+      this.props.user.getIdToken(true)
+        .then (token => this.updateReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
+        .catch(error => console.log(error));
+    }
+  }
+
+  handleCheck = (reaction) => {
+    if (this.props.user) {
+      this.props.user.getIdToken(true)
+        .then (token => this.checkReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
+        .catch(error => console.log(error));
+    }
   }
 
   // --------------------------------------------------------------------------------------
@@ -69,30 +90,28 @@ class SiteReaction extends React.Component {
       .catch(error => console.log(error));
   }
 
-  // --------------------------------------------------------------------------------------
-  // * Event handlers and Related Methods
-  // --------------------------------------------------------------------------------------
-  handleUpdate = (reaction) => {
-    if (this.props.user) {
-      this.props.user.getIdToken(true)
-        .then (token => this.updateReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
-        .catch(error => console.log(error));
-    }
-  }
-
-  // --------------------------------------------------------------------------------------
-  // Other Methods
-  // --------------------------------------------------------------------------------------
   updateReactionCount = (siteId, reaction, token, uid) => {
     Api.updateReactionCount(siteId, reaction, token, uid)
       .then(res => {
-        if (res.status === 200) {
-          this.setState({
-            reactions: update(this.state.reactions, { good: {$set: res.data.count} }),
-          });
-        }
+        this.setState({
+          reactions: update(this.state.reactions, { good: {$set: res.data.count} }),
+        });
       })
       .catch(error => console.log(error));
+  }
+
+  checkReactionCount = (siteId, reaction, token, uid) => {
+    Api.checkReactionCount(siteId, reaction, token, uid)
+      .then(res => {
+        this.setState({
+          check: update(this.state.check, { good: {$set: true} }),
+        });
+      })
+      .catch(error => {
+        this.setState({
+          check: update(this.state.check, { good: {$set: false} }),
+        });
+      });
   }
 
   // --------------------------------------------------------------------------------------
@@ -104,7 +123,7 @@ class SiteReaction extends React.Component {
       <div>
         <Button 
           variant="contained"
-          color="default"
+          color={this.state.check.good ? "primary" : "default"}
           className={c.reactionButton}
           onClick={() => this.handleUpdate('good')}
         >

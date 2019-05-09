@@ -38,7 +38,7 @@ class SiteDetail extends React.Component {
       isNotFound: false,
     };
 
-    Cmn.judgeSite(this, props.match.params.siteId) 
+    if (!this.props.isRegistration) Cmn.judgeSite(this, props.match.params.siteId) 
   }
 
   // --------------------------------------------------------------------------------------
@@ -46,9 +46,13 @@ class SiteDetail extends React.Component {
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
     console.log("run componentDidMount!");
-    Api.checkSite(this.props.match.params.siteId)
-      .then (res   => this.setState({ isChecking: false, isNotFound: false }))
-      .catch(error => this.setState({ isChecking: false, isNotFound: true  }));
+    if (this.props.isRegistration) {
+      this.setState({ isChecking: false, isNotFound: false });
+    } else {
+      Api.checkSite(this.props.match.params.siteId)
+        .then (res   => this.setState({ isChecking: false, isNotFound: false }))
+        .catch(error => this.setState({ isChecking: false, isNotFound: true  }));
+    }
   }
 
   // --------------------------------------------------------------------------------------

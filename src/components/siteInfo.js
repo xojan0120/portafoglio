@@ -82,37 +82,9 @@ class SiteInfo extends React.Component {
       },
       periodUnits:  [],
       skills:       [],
-      //isMine:    false,
       snackOpen:    false,
       snackMessage: '',
-      //user:         null,
     };
-
-    //Cmn.authSiteOwner(this, props.siteId) 
-
-    //FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-    //  if(user) {
-    //    // token取得
-    //    user.getIdToken(true)
-    //      .then (token => {
-    //        // site owner判定
-    //        Api.authSiteOwner(props.siteId, token)
-    //          .then(res => {
-    //            if (res.status === 200 && res.data.result === "true") {
-    //              this.setState({ authSiteOwner: true });
-    //            } else {
-    //              this.setState({ authSiteOwner: false });
-    //            }
-    //          })
-    //          .catch(error => console.log(error));
-    //      })
-    //      .catch(error => console.log(error) );
-    //    // user保持
-    //    this.setState({ user: user });
-    //  } else {
-    //    this.setState({ user: null });
-    //  }
-    //});
   }
 
   // --------------------------------------------------------------------------------------
@@ -124,8 +96,6 @@ class SiteInfo extends React.Component {
     this.getSkills();
     this.getSiteInfo(this.props.siteId);
 
-    const img = document.getElementById("screenshot");
-    if (img) console.log(img.src);
   }
 
   // --------------------------------------------------------------------------------------
@@ -273,7 +243,19 @@ class SiteInfo extends React.Component {
   handleUpdate = (siteInfo) => {
     if (this.props.user && this.validate()) {
       this.props.user.getIdToken(true)
-        .then (token => this.updateSiteInfo(siteInfo, token, this.props.user.uid))
+        .then (token => this.updateSiteInfo(this.props.siteId, siteInfo, token, this.props.user.uid))
+        .catch(error => console.log(error));
+    }
+  }
+
+  handleCreate = (siteInfo) => {
+    if (this.props.user && this.validate()) {
+      this.props.user.getIdToken(true)
+        .then (token => { 
+          const img = document.getElementById("screenshot");
+          if (img) siteInfo['screenshot'] = img.src;
+          this.createSiteInfo(siteInfo, token, this.props.user.uid)
+        })
         .catch(error => console.log(error));
     }
   }
@@ -293,26 +275,20 @@ class SiteInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   // Other Methods
   // --------------------------------------------------------------------------------------
-  updateEmail = () => {
-    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-      if(user) {
-        user.updateEmail("xojan0120.rails@gmail.com").then(function() {
-          console.log("update email");
-        }).catch(function(error) {
-          console.log(error);
-        });
-      }
-    });
+  updateSiteInfo = (siteId, siteInfo, token, uid) => {
+    Api.updateSiteInfo(siteId, siteInfo, token, uid) 
+      .then(res => {
+        this.setState({ snackMessage: res.data.message });
+      })
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
+      .finally(()    => this.setState({ snackOpen: true }));
   }
 
-  updateSiteInfo = (siteInfo, token, uid) => {
-    Api.updateSiteInfo(siteInfo, token, uid) 
+  createSiteInfo = (siteInfo, token, uid) => {
+    Api.createSiteInfo(siteInfo, token, uid) 
       .then(res => {
-        if (res.status === 200) {
-          this.setState({ snackMessage: res.data.message });
-        } else {
-          this.setState({ snackMessage: res.data.message });
-        }
+        this.setState({ snackMessage: res.data.message });
+        window.location.href = `/sites/${res.data.siteId}/detail`;
       })
       .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
       .finally(()    => this.setState({ snackOpen: true }));
@@ -350,7 +326,7 @@ class SiteInfo extends React.Component {
             value={this.state.siteInfo.owner}
           />
           <SiteInfoTextField
-            disabled={!this.props.isMine}
+            disabled={!this.props.isMine && !this.props.isRegistration}
             required={true}
             Icon={SiteIcon}
             id="siteName"
@@ -362,7 +338,7 @@ class SiteInfo extends React.Component {
             error={this.state.errors.siteName}
           />
           <SiteInfoTextField
-            disabled={!this.props.isMine}
+            disabled={!this.props.isMine && !this.props.isRegistration}
             required={true}
             Icon={SiteUrlIcon}
             id="siteUrl"
@@ -376,7 +352,7 @@ class SiteInfo extends React.Component {
           <Grid container alignItems="flex-end">
             <Grid item>
               <PeriodField
-                disabled={!this.props.isMine}
+                disabled={!this.props.isMine && !this.props.isRegistration}
                 c={c}
                 value={this.state.siteInfo.period}
                 error={this.state.errors.period}
@@ -385,7 +361,7 @@ class SiteInfo extends React.Component {
             </Grid>
             <Grid item>
               <PeriodUnitField
-                disabled={!this.props.isMine}
+                disabled={!this.props.isMine && !this.props.isRegistration}
                 c={c}
                 value={this.state.siteInfo.periodUnit}
                 onChange={(event)=>this.handlePeriodUnit(event)}
@@ -394,7 +370,7 @@ class SiteInfo extends React.Component {
             </Grid>
           </Grid>
           <UsedSkillsField
-            disabled={!this.props.isMine}
+            disabled={!this.props.isMine && !this.props.isRegistration}
             c={c}
             value={this.state.siteInfo.usedSkills}
             error={this.state.errors.usedSkills}
@@ -402,7 +378,7 @@ class SiteInfo extends React.Component {
             skills={this.state.skills}
           />
           <CommentField
-            disabled={!this.props.isMine}
+            disabled={!this.props.isMine && !this.props.isRegistration}
             c={c}
             value={this.state.siteInfo.comment}
             onChange={(event)=>this.handleComment(event)}
@@ -421,11 +397,12 @@ class SiteInfo extends React.Component {
         </form>
 
         {
-          this.props.isMine ?
+          this.props.isMine || this.props.isRegistration ?
             <Actions
               c={c}
               siteInfo={this.state.siteInfo}
               onClickUpdate={() => this.handleUpdate(this.state.siteInfo)}
+              onClickCreate={() => this.handleCreate(this.state.siteInfo)}
               onClickDelete={() => this.handleDelete()}
               isRegistration={this.props.isRegistration}
             />
@@ -681,10 +658,10 @@ const CommentField = ({disabled, c, value, onChange, error}) => {
   );
 }
 
-const Actions = ({c, siteInfo, onClickUpdate, onClickDelete, isRegistration}) => {
+const Actions = ({c, siteInfo, onClickUpdate, onClickCreate, onClickDelete, isRegistration}) => {
   return (
     <CardActions className={c.infoActions}>
-      <Button size="small" color="primary" onClick={onClickUpdate}>
+      <Button size="small" color="primary" onClick={ isRegistration ? onClickCreate : onClickUpdate}>
         { isRegistration ? 'Save' : 'Update' }
       </Button>
       

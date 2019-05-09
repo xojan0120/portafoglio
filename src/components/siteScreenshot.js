@@ -37,31 +37,40 @@ class SiteScreenshot extends React.Component {
     super(props);
     this.state = {
       screenshot:   false,
-      //isMine: false,
       snackOpen:    false,
       snackMessage: '',
-      //user:         null,
+      isLoading:    true,
     };
 
-    if (!this.props.isRegistration) {
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    console.log("run componentDidMount!");
+    if (this.props.isRegistration) {
+      this.setState({ isLoading: false })
+    } else {
       Api.getSiteScreenshot(this.props.siteId)
-        .then (res   => { if (res.status === 200) this.setState({ screenshot: res.data.url }) })
+        .then(res => {
+          this.setState({ screenshot: res.data.screenshot })
+          this.setState({ isLoading:  false })
+        })
         .catch(error => console.log(error));
     }
-
-    console.log(this.props.user);
   }
 
   // --------------------------------------------------------------------------------------
   // * Event handlers and Related Methods
   // --------------------------------------------------------------------------------------
-  handleUpload = (data) => {
+  handleUpdate = (data) => {
     if (this.props.user) {
       if (this.props.isRegistration) {
         this.setState({ screenshot: data });
       } else {
         this.props.user.getIdToken(true)
-          .then (token => this.uploadSiteScreenshot(data, token, this.props.user.uid))
+          .then (token => this.updateSiteScreenshot(this.props.siteId, data, token, this.props.user.uid))
           .catch(error => console.log(error));
       }
     }
@@ -80,32 +89,31 @@ class SiteScreenshot extends React.Component {
     }
   }
 
+  handleSnackClose = () => {
+    this.setState({ snackOpen: false });
+  };
+
   // --------------------------------------------------------------------------------------
   // Other Methods
   // --------------------------------------------------------------------------------------
-  uploadSiteScreenshot = (data, token, uid) => {
+  updateSiteScreenshot = (siteId, data, token, uid) => {
     if (this.props.isRegistration) {
       this.setState({ screenshot: data });
     } else {
-      Api.uploadSiteScreenshot(data, token, uid)
+      this.setState({ snackMessage: 'Uploading...', snackOpen: true });
+      Api.updateSiteScreenshot(siteId, data, token, uid)
         .then(res => {
-          console.log(data);
-          if (res.status === 200) {
-            //this.setState({ screenshot: true });
-            this.setState({ screenshot: data });
-          }
+          this.setState({ screenshot:   data })
+          this.setState({ snackMessage: res.data.message });
         })
-        .catch(error => console.log(error));
+        .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
+        .finally(()    => this.setState({ snackOpen: true }));
     }
   }
 
   deleteSiteScreenshot = (siteId, token, uid) => {
     Api.deleteSiteScreenshot(siteId, token, uid)
-      .then(res => {
-        if (res.status === 200) {
-          this.setState({ screenshot: false });
-        }
-      })
+      .then (res   => this.setState({ screenshot: false }))
       .catch(error => console.log(error));
   }
 
@@ -117,23 +125,33 @@ class SiteScreenshot extends React.Component {
     return (
       <Card className={screenshotCardClass(c, this.state.screenshot)} >
         { 
-          this.state.screenshot ?
-            <Screenshot 
-              c={c}
-              dataUrl={this.state.screenshot}
-              onUpload={data => this.handleUpload(data)}
-              onDelete={() => this.handleDelete()}
-              siteId={this.props.siteId}
-              user={this.props.user}
-              isRegistration={this.props.isRegistration}
-              isMine={this.props.isMine}
-            />
+          this.state.isLoading ?
+            null
             :
-            <Dropzone 
-              component={() => <NoImage c={c} />} 
-              callBack={data => this.uploadSiteScreenshot(data)}
-            />
+            this.state.screenshot ?
+              <Screenshot 
+                c={c}
+                dataUrl={this.state.screenshot}
+                onUpdate={data => this.handleUpdate(data)}
+                onDelete={() => this.handleDelete()}
+                siteId={this.props.siteId}
+                user={this.props.user}
+                isRegistration={this.props.isRegistration}
+                isMine={this.props.isMine}
+              />
+              :
+              <Dropzone 
+                component={() => <NoImage c={c} />} 
+                callBack={data => this.handleUpdate(data)}
+              />
         }
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={this.state.snackOpen}
+          onClose={this.handleSnackClose}
+          autoHideDuration={3000}
+          message={<span id="message-id">{this.state.snackMessage}</span>}
+        />
       </Card>
     );
   }
@@ -209,11 +227,10 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, isRegistration, isMine}) => {
+const Screenshot = ({c, dataUrl, onUpdate, onDelete, siteId, user, isRegistration, isMine}) => {
   return (
     <React.Fragment>
       <div>
-        {/* <img className={c.screenshot} src="https://material-ui.com/static/images/cards/contemplative-reptile.jpg" /> */}
         <img className={c.screenshot} src={dataUrl} id="screenshot"/>
       </div>
 
@@ -222,10 +239,10 @@ const Screenshot = ({c, dataUrl, onUpload, onDelete, siteId, user, isRegistratio
           { isRegistration ? null : <SiteReaction siteId={siteId} user={user} /> }
         </div>
         { 
-          isMine ?
+          isMine || isRegistration ?
             <div>
               <Button size="small" color="primary">
-                <Dropzone caption="Change" callBack={onUpload} />
+                <Dropzone caption="Change" callBack={onUpdate} />
               </Button>
               <Button size="small" color="primary" onClick={onDelete}>
                 Delete
@@ -249,9 +266,6 @@ const NoImage = ({c}) => {
     </div>
   );
 }
-//      <div>
-//        <span style={{verticalAlign:"middle",display:"table-cell",height:500}}>hoge</span>
-//      </div>
 
 // --------------------------------------------------------------------------------------
 // Return css class names functions
