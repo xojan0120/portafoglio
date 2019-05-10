@@ -169,7 +169,7 @@ const styles = theme => {
       //[theme.breakpoints.up('md')]: {
       //  height: 750,
       //},
-      height: '90vh',
+      height: 'auto',
     },
 
     pointer: {
@@ -177,7 +177,12 @@ const styles = theme => {
     },
 
     screenshot: {
-      height: 690,
+      [theme.breakpoints.down('sm')]: {
+        height: '100%',
+      },
+      [theme.breakpoints.up('md')]: {
+        height: 690,
+      },
       width:  '100%',
       objectFit: 'contain',
     },

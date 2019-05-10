@@ -50,7 +50,8 @@ const ajax = axios.create({
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest', // クロスドメインの場合必要
   },
-  responseType: 'json'
+  responseType: 'json',
+  withCredentials: true, // クッキーやセッションを扱うのに必要
 });
 
 // -------------------------------------------------------------------------------------------------
@@ -69,41 +70,9 @@ const withAuthorizationHeader = (token) => {
 // * API functions
 // -------------------------------------------------------------------------------------------------
 export const getSiteList = (page, uid) => {
-  const data = { params: {page: page, uid: uid} };
-  return ajax.get('/sites', data);
-
-  //const promise = new Promise((resolve, reject) => {
-  //  setTimeout(() => {
-  //    let json = null;
-  //    switch (page) {
-  //      case 1:
-  //        json = testGetSites1;
-  //        break;
-  //      case 2:
-  //        json = testGetSites2;
-  //        break;
-  //      case 3:
-  //        json = testGetSites3;
-  //        break;
-  //      case 4:
-  //        json = testGetSites4;
-  //        break;
-  //      default:
-  //        json = notFoundJson;
-  //    }
-  //    if (uid) { 
-  //      if (page <= 1) {
-  //        json = testGetMySites;
-  //      } else {
-  //        json = notFoundJson;
-  //      }
-  //    } 
-  //    resolve(json);
-  //  },1000);
-  //});
-  //return promise;
+  const option = { params: {page: page, uid: uid} };
+  return ajax.get('/sites', option);
 }
-
 
 export const getPeriodUnits = () => {
   return ajax.get('/units');
@@ -136,10 +105,16 @@ export const updateReactionCount = (siteId, reaction, token, uid) => {
   return ajax.post(`/sites/${siteId}/reactions`, { reaction: reaction, uid: uid });
 }
 
+export const deleteReactionCount = (siteId, reaction, token, uid) => {
+  withAuthorizationHeader(token)
+  const option = { params: { reaction: reaction, uid: uid } };
+  return ajax.delete(`/sites/${siteId}/reactions`, option);
+}
+
 export const checkReactionCount = (siteId, reaction, token, uid) => {
   withAuthorizationHeader(token)
-  const data = { params: { reaction: reaction, uid: uid } };
-  return ajax.get(`/sites/${siteId}/reactions/check`, data);
+  const option = { params: { reaction: reaction, uid: uid } };
+  return ajax.get(`/sites/${siteId}/reactions/check`, option);
 }
 
 export const getViewCount = (siteId) => {
@@ -228,8 +203,8 @@ export const updateSiteScreenshot = (siteId, data, token, uid) => {
 
 export const deleteSiteScreenshot = (siteId, token, uid) => {
   withAuthorizationHeader(token)
-  const data = { params: {uid: uid} };
-  return ajax.delete(`/sites/${siteId}/screenshot`, data);
+  const option = { params: {uid: uid} };
+  return ajax.delete(`/sites/${siteId}/screenshot`, option);
 }
 
 export const updateSiteInfo = (siteId, data, token, uid) => {

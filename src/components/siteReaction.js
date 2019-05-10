@@ -28,6 +28,11 @@ import update    from 'immutability-helper';
 // -------------------------------------------------------------------------------------------------
 import * as Api from '../lib/api';
 
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
+import * as FirebaseAuth from '../components/firebase/firebaseAuth';
+
 // ----------------------------------------------------------------------------------------
 // * Main Class
 // ----------------------------------------------------------------------------------------
@@ -54,6 +59,7 @@ class SiteReaction extends React.Component {
     Api.updateViewCount(this.props.siteId);
     this.getReactionsCount(this.props.siteId);
     this.getViewCount(this.props.siteId);
+    this.handleCheck('good');
   }
 
   // --------------------------------------------------------------------------------------
@@ -67,12 +73,28 @@ class SiteReaction extends React.Component {
     }
   }
 
-  handleCheck = (reaction) => {
+  handleDelete = (reaction) => {
     if (this.props.user) {
       this.props.user.getIdToken(true)
-        .then (token => this.checkReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
+        .then (token => this.deleteReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
         .catch(error => console.log(error));
     }
+  }
+
+  handleCheck = (reaction) => {
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      if (user) {
+        user.getIdToken(true)
+          .then (token => this.checkReactionCount(this.props.siteId, reaction, token, user.uid))
+          .catch(error => console.log(error));
+      }
+    });
+
+    //if (this.props.user) {
+    //  this.props.user.getIdToken(true)
+    //    .then (token => this.checkReactionCount(this.props.siteId, reaction, token, this.props.user.uid))
+    //    .catch(error => console.log(error));
+    //}
   }
 
   // --------------------------------------------------------------------------------------
@@ -96,6 +118,18 @@ class SiteReaction extends React.Component {
         this.setState({
           reactions: update(this.state.reactions, { good: {$set: res.data.count} }),
         });
+        this.handleCheck('good');
+      })
+      .catch(error => console.log(error));
+  }
+
+  deleteReactionCount = (siteId, reaction, token, uid) => {
+    Api.deleteReactionCount(siteId, reaction, token, uid)
+      .then(res => {
+        this.setState({
+          reactions: update(this.state.reactions, { good: {$set: res.data.count} }),
+        });
+        this.handleCheck('good');
       })
       .catch(error => console.log(error));
   }
@@ -112,6 +146,7 @@ class SiteReaction extends React.Component {
           check: update(this.state.check, { good: {$set: false} }),
         });
       });
+    console.log(siteId, reaction, token, uid);
   }
 
   // --------------------------------------------------------------------------------------
@@ -123,9 +158,10 @@ class SiteReaction extends React.Component {
       <div>
         <Button 
           variant="contained"
+          disabled={!this.props.user}
           color={this.state.check.good ? "primary" : "default"}
           className={c.reactionButton}
-          onClick={() => this.handleUpdate('good')}
+          onClick={() => this.state.check.good ? this.handleDelete('good') : this.handleUpdate('good')}
         >
           <GoodIcon className={c.reactionIcon} />{this.state.reactions.good}
         </Button>

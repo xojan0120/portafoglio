@@ -432,7 +432,7 @@ const styles = theme => {
       paddingLeft:  10,
       paddingRight: 30,
 
-      height: '90vh',
+      height: 'auto',
 
       //[theme.breakpoints.down('sm')]: {
       //  height:     '100%',
