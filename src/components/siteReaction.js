@@ -102,7 +102,9 @@ class SiteReaction extends React.Component {
   // --------------------------------------------------------------------------------------
   getReactionsCount = (siteId) => {
     Api.getReactionsCount(siteId)
-      .then (res   => this.setState({ reactions: res.data.reactions }) )
+      .then (res   => {
+        this.setState({ reactions: res.data.reactions })
+      })
       .catch(error => console.log(error));
   }
 
@@ -146,7 +148,6 @@ class SiteReaction extends React.Component {
           check: update(this.state.check, { good: {$set: false} }),
         });
       });
-    console.log(siteId, reaction, token, uid);
   }
 
   // --------------------------------------------------------------------------------------

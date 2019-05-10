@@ -117,11 +117,9 @@ class SiteInfo extends React.Component {
     if (this.props.isRegistration) {
       FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
         if (user) {
-          Api.getUsername(user.uid)
+          Api.getNickname(user.uid)
             .then(res => {
-              if (res.status === 200) {
-                this.setState({ siteInfo: update(this.state.siteInfo, { owner: {$set: res.data.username} }) });
-              }
+                this.setState({ siteInfo: update(this.state.siteInfo, { owner: {$set: res.data.nickname} }) });
             })
             .catch(error => console.log(error));
         }
@@ -297,12 +295,8 @@ class SiteInfo extends React.Component {
   deleteSite = (siteId, token, uid) => {
     Api.deleteSite(siteId, token, uid) 
       .then(res => {
-        if (res.status === 200) {
           this.setState({ snackMessage: res.data.message });
-          setTimeout(() => window.location.href = "/", 2000);
-        } else {
-          this.setState({ snackMessage: res.data.message });
-        }
+          setTimeout(() => window.location.href = `/users/${uid}/detail`, 2000);
       })
       .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
       .finally(()    => this.setState({ snackOpen: true }));

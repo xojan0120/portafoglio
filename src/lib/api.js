@@ -51,7 +51,6 @@ const ajax = axios.create({
     'X-Requested-With': 'XMLHttpRequest', // クロスドメインの場合必要
   },
   responseType: 'json',
-  withCredentials: true, // クッキーやセッションを扱うのに必要
 });
 
 // -------------------------------------------------------------------------------------------------
@@ -119,33 +118,14 @@ export const checkReactionCount = (siteId, reaction, token, uid) => {
 
 export const getViewCount = (siteId) => {
   return ajax.get(`/sites/${siteId}/views`);
-
-  //const promise = new Promise((resolve, reject) => {
-  //  setTimeout(()=> {
-  //    resolve(testGetViewCount);
-  //  },1000);
-  //});
-  //return promise;
 }
 
 export const updateViewCount = (siteId) => {
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testPostSiteView);
-    },1000);
-  });
-  return promise;
+  return ajax.post(`/sites/${siteId}/views`);
 }
 
 export const getSiteInfo = (siteId) => {
   return ajax.get(`/sites/${siteId}/info`);
-
-  //const promise = new Promise((resolve, reject) => {
-  //  setTimeout(()=> {
-  //    resolve(testGetSiteInfo);
-  //  },1000);
-  //});
-  //return promise;
 }
 
 export const authSiteOwner = (siteId, token) => {
@@ -219,30 +199,12 @@ export const createSiteInfo = (data, token, uid) => {
 
 export const deleteSite = (siteId, token, uid) => {
   withAuthorizationHeader(token)
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testDeleteSite);
-    },1000);
-  });
-  return promise;
+  const option = { params: {uid: uid} };
+  return ajax.delete(`/sites/${siteId}`, option);
 }
 
-export const getUserInfo = (uid) => {
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testGetUserInfo);
-    },1000);
-  });
-  return promise;
-}
-
-export const getUsername = (uid) => {
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(()=> {
-      resolve(testGetUsername);
-    },1000);
-  });
-  return promise;
+export const getNickname = (uid) => {
+  return ajax.get(`/users/${uid}`);
 }
 
 export const updateNickname = (uid, token, nickname) => {

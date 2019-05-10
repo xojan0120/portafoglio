@@ -49,8 +49,8 @@ class UserInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
     console.log("run componentDidMount!");
-    Api.getUserInfo(this.props.uid)
-      .then(res => { if (res.status === 200) this.setState({ nickname: res.data.userInfo.nickname }) })
+    Api.getNickname(this.props.uid)
+      .then(res => this.setState({ nickname: res.data.nickname }) )
       .catch(error => console.log(error));
   }
 
