@@ -38,9 +38,9 @@ class SignIn extends React.Component {
 const successCallback = (authResult, redirectUrl) => {
   authResult.user.getIdToken(true)
     .then (token => {
-      if (authResult.additionalUserInfo.isNewUser) {  
+      //if (authResult.additionalUserInfo.isNewUser) {  
         Api.createAccount(token, authResult.user.uid);
-      }
+      //}
     })
     .catch(error => console.log(`Firebase get token failed!: ${error.message}`))
     .finally(() => window.location.pathname = '/');

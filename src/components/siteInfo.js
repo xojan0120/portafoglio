@@ -6,46 +6,45 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import TextField      from '@material-ui/core/TextField';
-import { withStyles } from '@material-ui/core/styles';
-import OwnerIcon      from '@material-ui/icons/AccountCircle';
-import SiteIcon       from '@material-ui/icons/WebAsset';
-import SiteUrlIcon    from '@material-ui/icons/Link';
-import PeriodIcon     from '@material-ui/icons/AccessTime';
-import SkillIcon      from '@material-ui/icons/Build';
-import Grid           from '@material-ui/core/Grid';
-import MenuItem       from '@material-ui/core/MenuItem';
-import CommentIcon    from '@material-ui/icons/ModeComment';
-import UpdateAtIcon   from '@material-ui/icons/CalendarToday';
+import Button         from '@material-ui/core/Button';
 import Card           from '@material-ui/core/Card';
 import CardActions    from '@material-ui/core/CardActions';
-import Button         from '@material-ui/core/Button';
+import CommentIcon    from '@material-ui/icons/ModeComment';
+import Grid           from '@material-ui/core/Grid';
+import MenuItem       from '@material-ui/core/MenuItem';
+import OwnerIcon      from '@material-ui/icons/AccountCircle';
+import PeriodIcon     from '@material-ui/icons/AccessTime';
+import SiteIcon       from '@material-ui/icons/WebAsset';
+import SiteUrlIcon    from '@material-ui/icons/Link';
+import SkillIcon      from '@material-ui/icons/Build';
 import Snackbar       from '@material-ui/core/Snackbar';
+import TextField      from '@material-ui/core/TextField';
+import UpdateAtIcon   from '@material-ui/icons/CalendarToday';
+import { withStyles } from '@material-ui/core/styles';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
+import CreatableSelect from 'react-select/lib/Creatable';
 import PropTypes       from 'prop-types';
 import classNames      from 'classnames';
-import CreatableSelect from 'react-select/lib/Creatable';
-import update          from 'immutability-helper';
 import dateFormat      from 'dateformat';
+import update          from 'immutability-helper';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import * as Api       from '../lib/api';
-import '../css/common.scss';
+import * as Api      from '../lib/api';
+import * as Cmn      from '../lib/common';
 import {
+  cmnValidCommentLength,
+  cmnValidCreationPeriodMax,
+  cmnValidCreationPeriodMin,
   cmnValidSiteNameLength,
   cmnValidSiteUrlLength,
-  cmnValidCreationPeriodMin,
-  cmnValidCreationPeriodMax,
   cmnValidUsedSkillsQuantity,
-  cmnValidCommentLength,
+  cmnValidUsedSkillLength,
 }                    from '../lib/constants';
-import * as Cmn      from '../lib/common';
-import { LoaderBox } from '../lib/common';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Firebase)
@@ -91,7 +90,6 @@ class SiteInfo extends React.Component {
   // * Lifecycle Methods
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
-    console.log("run componentDidMount!");
     this.getPeriodUnits();
     this.getSkills();
     this.getSiteInfo(this.props.siteId);
@@ -149,8 +147,6 @@ class SiteInfo extends React.Component {
   }
 
   handleSiteUrl = (event) => {
-    //const re = /(?:^|[\s　]+)((?:https?):\/\/[^\s　]+)/
-
     if (event.target.value.length <= cmnValidSiteUrlLength) {
       this.setState({
         siteInfo: update(this.state.siteInfo, { siteUrl: {$set: event.target.value} }),
@@ -185,23 +181,39 @@ class SiteInfo extends React.Component {
   }
 
   handleUsedSkills = (newValue, actionMeta) => {
-    // TODO: 入力されたスキル名の長さもチェックする(モデル側は10文字)
     if (newValue.length <= cmnValidUsedSkillsQuantity) {
-      console.group('Value Changed');
-      console.log(newValue);
-      console.log(`action: ${actionMeta.action}`);
-      console.groupEnd();
-      this.setState({
-        siteInfo: update(this.state.siteInfo, { usedSkills: {$set: newValue} }),
-        errors:   update(this.state.errors,   { usedSkills: {$set: false} })
-      });
+      //console.group('Value Changed');
+      //console.log(newValue);
+      //console.log(`action: ${actionMeta.action}`);
+      //console.groupEnd();
+      if (this.validateSkillLength(newValue)) {
+        this.setState({
+          siteInfo: update(this.state.siteInfo, { usedSkills: {$set: newValue} }),
+          errors:   update(this.state.errors,   { usedSkills: {$set: false} })
+        });
+      } else {
+        const msg = `Skill name should be ${cmnValidUsedSkillLength} characters or less.`; 
+        this.setState({
+          errors:   update(this.state.errors, { usedSkills: {$set: msg} })
+        });
+      }
     } else {
       const msg = `Please select ${cmnValidUsedSkillsQuantity} or less.`; 
       this.setState({
-        errors:   update(this.state.errors,   { usedSkills: {$set: msg} })
+        errors:   update(this.state.errors, { usedSkills: {$set: msg} })
       });
     }
   };
+
+  validateSkillLength = (newValue) => {
+    let result = true;
+    newValue.forEach(item => {
+      if (item.value.length > cmnValidUsedSkillLength) {
+        result = false;
+      }
+    });
+    return result;
+  }
 
   handleComment = (event) => {
     if (event.target.value.length <= cmnValidCommentLength) {
@@ -220,50 +232,65 @@ class SiteInfo extends React.Component {
   validate = () => {
     let result = true;
     const newErrors = Object.assign({}, this.state.errors);
+
     if (this.state.siteInfo.siteName.length === 0) {
-      newErrors.siteName = 'please input something.';
+      newErrors.siteName = 'Please input something.';
       result = false;
-      //this.setState({
-      //  errors: update(this.state.errors, { siteName: {$set: 'please input something.'} })
-      //});
     }
+
     if (this.state.siteInfo.siteUrl.length === 0) {
-      newErrors.siteUrl = 'please input something.';
+      newErrors.siteUrl = 'Please input something.';
       result = false;
-      //this.setState({
-      //  errors: update(this.state.errors, { siteUrl:  {$set: 'please input something.'} })
-      //});
+    } else {
+      const re = /(?:^|[\s　]+)((?:https?):\/\/[^\s　]+)/
+      if (!this.state.siteInfo.siteUrl.match(re)) {
+        newErrors.siteUrl = 'Invalid URL.';
+        result = false;
+      }
     }
+
     this.setState({ errors: newErrors });
     return result;
   }
 
   handleUpdate = (siteInfo) => {
-    if (this.props.user && this.validate()) {
-      this.props.user.getIdToken(true)
-        .then (token => this.updateSiteInfo(this.props.siteId, siteInfo, token, this.props.user.uid))
-        .catch(error => console.log(error));
+    if (this.validate()) {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) {
+          user.getIdToken(true)
+            .then (token => {
+              this.updateSiteInfo(this.props.siteId, siteInfo, token, user.uid);
+            })
+            .catch(error => console.log(error));
+        }
+      });
     }
   }
 
   handleCreate = (siteInfo) => {
-    if (this.props.user && this.validate()) {
-      this.props.user.getIdToken(true)
-        .then (token => { 
-          const img = document.getElementById("screenshot");
-          if (img) siteInfo['screenshot'] = img.src;
-          this.createSiteInfo(siteInfo, token, this.props.user.uid)
-        })
-        .catch(error => console.log(error));
+    if (this.validate()) {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) {
+          user.getIdToken(true)
+            .then (token => {
+              const img = document.getElementById("screenshot");
+              if (img) siteInfo['screenshot'] = img.src;
+              this.createSiteInfo(siteInfo, token, user.uid)
+            })
+            .catch(error => console.log(error));
+        }
+      });
     }
   }
 
   handleDelete = () => {
-    if (this.props.user) {
-      this.props.user.getIdToken(true)
-        .then (token => this.deleteSite(this.props.siteId, token, this.props.user.uid))
-        .catch(error => console.log(error));
-    }
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      if (user) {
+        user.getIdToken(true)
+          .then (token => this.deleteSite(this.props.siteId, token, user.uid))
+          .catch(error => console.log(error));
+      }
+    });
   }
 
   handleSnackClose = () => {
@@ -276,30 +303,27 @@ class SiteInfo extends React.Component {
   updateSiteInfo = (siteId, siteInfo, token, uid) => {
     Api.updateSiteInfo(siteId, siteInfo, token, uid) 
       .then(res => {
-        this.setState({ snackMessage: res.data.message });
+        this.setState({ snackMessage: res.data.message, snackOpen: true });
       })
-      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-      .finally(()    => this.setState({ snackOpen: true }));
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true }));
   }
 
   createSiteInfo = (siteInfo, token, uid) => {
     Api.createSiteInfo(siteInfo, token, uid) 
       .then(res => {
-        this.setState({ snackMessage: res.data.message });
+        this.setState({ snackMessage: res.data.message, snackOpen: true });
         window.location.href = `/sites/${res.data.siteId}/detail`;
       })
-      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-      .finally(()    => this.setState({ snackOpen: true }));
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true }));
   }
 
   deleteSite = (siteId, token, uid) => {
     Api.deleteSite(siteId, token, uid) 
       .then(res => {
-          this.setState({ snackMessage: res.data.message });
+          this.setState({ snackMessage: res.data.message, snackOpen: true });
           setTimeout(() => window.location.href = `/users/${uid}/detail`, 2000);
       })
-      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-      .finally(()    => this.setState({ snackOpen: true }));
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true }));
   }
 
   // --------------------------------------------------------------------------------------
@@ -401,7 +425,7 @@ class SiteInfo extends React.Component {
               isRegistration={this.props.isRegistration}
             />
             :
-            ""
+            null
         }
 
         <Snackbar
@@ -426,14 +450,10 @@ const styles = theme => {
       paddingLeft:  10,
       paddingRight: 30,
 
-      height: 'auto',
-
-      //[theme.breakpoints.down('sm')]: {
-      //  height:     '100%',
-      //},
-      //[theme.breakpoints.up('md')]: {
-      //  height:     750,
-      //},
+      [theme.breakpoints.down('sm')]: {
+        height: 'auto',
+      },
+      height: 750,
     },
 
     form: {
@@ -599,6 +619,9 @@ const UsedSkillsField = ({disabled, c, value, error, onChange, skills}) => {
       ...provided,
       backgroundColor: "none",
     }),
+    multiValueRemove: (base, state) => {
+      return disabled ? { ...base, display: 'none' } : base;
+    }
   }
   return (
     <div className={c.form}>
@@ -622,6 +645,10 @@ const UsedSkillsField = ({disabled, c, value, error, onChange, skills}) => {
       </div>
     </div>
   );
+}
+
+const MultiValueRemove = () => {
+  return null
 }
 
 const CommentField = ({disabled, c, value, onChange, error}) => {

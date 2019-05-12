@@ -6,12 +6,17 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import { withStyles } from '@material-ui/core/styles';
-import TextField      from '@material-ui/core/TextField';
-import AccountCircle  from '@material-ui/icons/AccountCircle';
-import Button         from '@material-ui/core/Button';
-import Snackbar       from '@material-ui/core/Snackbar';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import AccountCircle     from '@material-ui/icons/AccountCircle';
+import Button            from '@material-ui/core/Button';
+import Dialog            from '@material-ui/core/Dialog';
+import DialogActions     from '@material-ui/core/DialogActions';
+import DialogContent     from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle       from '@material-ui/core/DialogTitle';
+import InputAdornment    from '@material-ui/core/InputAdornment';
+import Snackbar          from '@material-ui/core/Snackbar';
+import TextField         from '@material-ui/core/TextField';
+import { withStyles }    from '@material-ui/core/styles';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -39,6 +44,7 @@ class UserInfo extends React.Component {
     this.state = {
       nickname:     '',
       snackOpen:    false,
+      alertOpen:    false,
       snackMessage: '',
       error:        false,
     };
@@ -48,7 +54,6 @@ class UserInfo extends React.Component {
   // * Lifecycle Methods
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
-    console.log("run componentDidMount!");
     Api.getNickname(this.props.uid)
       .then(res => this.setState({ nickname: res.data.nickname }) )
       .catch(error => console.log(error));
@@ -70,22 +75,39 @@ class UserInfo extends React.Component {
     }
   }
 
-  handleUpdate = (event) => {
-    if (this.props.user && this.validate()) {
-      this.props.user.getIdToken(true)
-        .then (token => this.updateNickname(this.props.uid, token, this.state.nickname))
-        .catch(error => console.log(error));
+  handleUpdate = () => {
+    if (this.validate()) {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) {
+          user.getIdToken(true)
+            .then (token => this.updateNickname(this.props.uid, token, this.state.nickname))
+            .catch(error => console.log(error));
+        }
+      });
     }
   }
 
-  handleDelete = (event) => {
-    this.props.user.getIdToken(true)
-      .then (token => this.deleteAccount(this.props.uid, token))
-      .catch(error => console.log(error));
+  handleDelete = () => {
+    this.handleAlertClose();
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      if (user) {
+        user.getIdToken(true)
+          .then (token => this.deleteAccount(token, this.props.uid))
+          .catch(error => console.log(error));
+      }
+    });
   }
 
   handleSnackClose = () => {
     this.setState({ snackOpen: false });
+  };
+
+  handleAlertOpen = () => {
+    this.setState({ alertOpen: true });
+  };
+
+  handleAlertClose = () => {
+    this.setState({ alertOpen: false });
   };
 
   // --------------------------------------------------------------------------------------
@@ -93,30 +115,26 @@ class UserInfo extends React.Component {
   // --------------------------------------------------------------------------------------
   updateNickname = (uid, token, nickname) => {
     Api.updateNickname(uid, token, nickname) 
-      .then(res => {
-        if (res.status === 200) {
-          this.setState({ snackMessage: res.data.message });
-        } else {
-          this.setState({ snackMessage: res.data.message });
-        }
-      })
-      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-      .finally(()    => this.setState({ snackOpen: true }));
+      .then(res => this.setState({ snackMessage: res.data.message, snackOpen: true }))
+      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true }));
   }
 
-  deleteAccount = (uid, token) => {
-    Api.updateNickname(uid, token) 
+  deleteAccount = (token, uid) => {
+    Api.deleteAccount(token, uid) 
       .then(res => {
-        if (res.status === 200) {
-          FirebaseAuth.signOut();
-          this.setState({ snackMessage: res.data.message });
-          setTimeout(() => window.location.href = "/", 2000);
-        } else {
-          this.setState({ snackMessage: res.data.message });
-        }
+        FirebaseAuth.userDelete(()=>this.deleteAccountSuccess(res),this.deleteAccountFailure);
       })
-      .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-      .finally(()    => this.setState({ snackOpen: true }));
+      .catch(error => {
+        this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true })
+      });
+  }
+
+  deleteAccountSuccess = (res) => {
+    this.setState({ snackMessage: res.data.message, snackOpen: true });
+    setTimeout(() => window.location.href = "/", 2000);
+  }
+  deleteAccountFailure = (error) => {
+    this.setState({ snackMessage: 'Delete account failed.' })
   }
 
   validate = () => {
@@ -157,12 +175,35 @@ class UserInfo extends React.Component {
             this.props.isMe ?
               <div className={c.actions}>
                 <Button className={c.actionButton} variant="contained" onClick={this.handleUpdate}>Change</Button>
-                <Button className={c.actionButton} variant="contained" onClick={this.handleDelete}>Delete account</Button>
+                <Button className={c.actionButton} variant="contained" onClick={this.handleAlertOpen}>Delete account</Button>
               </div>
               :
               null
           }
         </div>
+
+        <Dialog
+          open={this.state.alertOpen}
+          onClose={this.handleAlertClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Delete account"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Delete your account?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleDelete} color="primary">
+              YES
+            </Button>
+            <Button onClick={this.handleAlertClose} color="primary" autoFocus>
+              NO
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <Snackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           open={this.state.snackOpen}
@@ -205,6 +246,9 @@ const styles = theme => {
 
     actionButton: {
       marginLeft: 10,
+      [theme.breakpoints.down('sm')]: {
+        marginTop: 10,
+      },
     },
   });
 }

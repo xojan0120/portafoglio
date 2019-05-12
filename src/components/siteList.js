@@ -5,21 +5,21 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import Button from '@material-ui/core/Button';
+import Button         from '@material-ui/core/Button';
+import { withStyles } from '@material-ui/core/styles';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
-import InfiniteScroll              from 'react-infinite-scroller';
-import { Link }                    from 'react-router-dom';
-import pathParse                   from 'path-parse';
-import { FaPlusSquare as AddIcon } from 'react-icons/fa';
+import InfiniteScroll from 'react-infinite-scroller';
+import PropTypes      from 'prop-types';
+import { Link }       from 'react-router-dom';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import SiteItem      from './siteItem';
 import * as Api      from '../lib/api';
+import SiteItem      from './siteItem';
 import { LoaderBox } from '../lib/common';
 
 // ----------------------------------------------------------------------------------------
@@ -32,13 +32,6 @@ class SiteList extends React.Component {
       list:         [],
       hasMoreItems: true,
     };
-  }
-
-  // --------------------------------------------------------------------------------------
-  // * Lifecycle Methods
-  // --------------------------------------------------------------------------------------
-  componentDidMount = () => {
-    console.log("run componentDidMount!");
   }
 
   // --------------------------------------------------------------------------------------
@@ -56,9 +49,7 @@ class SiteList extends React.Component {
   }
 
   getLoadMore = (page) => {
-    console.log("run getLoadMore!");
     this.getSiteList(page, this.props.uid);
-    console.log(page);
   }
 
   // --------------------------------------------------------------------------------------
@@ -73,9 +64,17 @@ class SiteList extends React.Component {
   }
 
   render = () => {
+    const c = this.props.classes;
     return (
       <div>
-        { this.props.uid ? <Button variant="contained" component={Link} to="/sites/register">Site add</Button> : null }
+        { 
+          this.props.uid ? 
+              <div className={c.siteAdd}>
+                <Button variant="contained" component={Link} to="/sites/register">Site add</Button>
+              </div>
+              :
+              null
+        }
         <InfiniteScroll
           initialLoad={true}
           loadMore={(page)=>this.getLoadMore(page)}
@@ -83,7 +82,7 @@ class SiteList extends React.Component {
           loader={<LoaderBox key={0} />} // keyが必要。公式ドキュメントにも記載有り。https://github.com/CassetteRocks/react-infinite-scroller#props
           threshold={10}
         >
-          <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start'}}>
+          <div className={c.list}>
             {this.renderList()}
           </div>
         </InfiniteScroll>
@@ -92,7 +91,35 @@ class SiteList extends React.Component {
   }
 }
 
+// -------------------------------------------------------------------------------------------------
+// Styles
+// -------------------------------------------------------------------------------------------------
+const styles = theme => {
+  return ({
+    siteAdd: {
+      marginLeft: 10,
+    },
+
+    list: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-start',
+
+      //[theme.breakpoints.down('sm')]: {
+      //  justifyContent: 'space-around',
+      //},
+    },
+  });
+}
+
+// --------------------------------------------------------------------------------------
+// PropTypes
+// --------------------------------------------------------------------------------------
+SiteList.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
 // --------------------------------------------------------------------------------------
 // Export Module
 // --------------------------------------------------------------------------------------
-export default SiteList;
+export default withStyles(styles)(SiteList);

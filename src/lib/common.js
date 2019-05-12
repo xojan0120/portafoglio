@@ -4,10 +4,6 @@
 import React, {useCallback} from 'react';
 
 // -------------------------------------------------------------------------------------------------
-// * Import Modules(MaterialUI)
-// -------------------------------------------------------------------------------------------------
-
-// -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
 import { SyncLoader as Loader } from 'react-spinners';
@@ -27,9 +23,6 @@ import * as FirebaseAuth from '../components/firebase/firebaseAuth';
 // ----------------------------------------------------------------------------------------
 // * Common Function
 // ----------------------------------------------------------------------------------------
-//export const hide = (isLoading) => {
-//  return isLoading ? {visibility: "hidden"} : {visibility: "visible"}
-//}
 export const getApiError = (error) => {
   let message = '';
   try {
@@ -40,21 +33,14 @@ export const getApiError = (error) => {
   return message;
 }
 
-export const setUser = (self) => {
-  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-    user ? self.setState({ user: user }) : self.setState({ user: null });
-    self.setState({ isLoading: false });
-  });
-}
-
-export const judgeSite = (self, siteId) => {
+export const judgeSite = (self, siteId, uid) => {
   FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
     if(user) {
       user.getIdToken(true)
         .then (token => {
-          Api.judgeSite(siteId, token)
+          Api.judgeSite(siteId, uid, token)
             .then(res => {
-              if (res.status === 200 && res.data.result === "true") {
+              if (res.status === 200 && res.data.result === true) {
                 self.setState({ isMine: true });
               } else {
                 self.setState({ isMine: false });
@@ -74,7 +60,7 @@ export const judgeUser = (self, uid) => {
         .then (token => {
           Api.judgeUser(uid, token)
             .then(res => {
-              if (res.status === 200 && res.data.result === "true") {
+              if (res.status === 200 && res.data.result === true) {
                 self.setState({ isMe: true });
               } else {
                 self.setState({ isMe: false });
@@ -86,32 +72,6 @@ export const judgeUser = (self, uid) => {
     }
   });
 }
-
-//export const authSiteOwner = (self, siteId) => {
-//  FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-//    if(user) {
-//      // token取得
-//      user.getIdToken(true)
-//        .then (token => {
-//          // site owner判定
-//          Api.authSiteOwner(siteId, token)
-//            .then(res => {
-//              if (res.status === 200 && res.data.result === "true") {
-//                self.setState({ authSiteOwner: true });
-//              } else {
-//                self.setState({ authSiteOwner: false });
-//              }
-//            })
-//            .catch(error => console.log(error));
-//        })
-//        .catch(error => console.log(error) );
-//      // user保持
-//      self.setState({ user: user });
-//    } else {
-//      self.setState({ user: null });
-//    }
-//  });
-//}
 
 // ----------------------------------------------------------------------------------------
 // * Common Component

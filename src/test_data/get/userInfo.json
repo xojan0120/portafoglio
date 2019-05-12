@@ -1,9 +1,0 @@
-{
-  "status": 200,
-  "data": {
-    "message": "Success",
-    "userInfo": {
-      "nickname": "john smith"
-    }
-  }
-}

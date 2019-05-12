@@ -16,9 +16,12 @@ import PropTypes     from 'prop-types';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import UserInfo from './userInfo';
-import * as Cmn from '../lib/common';
-import SiteList from './siteList';
+import * as Api      from '../lib/api';
+import * as Cmn      from '../lib/common';
+import NotFound      from './notFound';
+import SiteList      from './siteList';
+import UserInfo      from './userInfo';
+import { LoaderBox } from '../lib/common';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -27,26 +30,41 @@ class UserPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isMe: false,
+      isMe:       false,
+      isChecking: true,
+      isNotFound: false,
     };
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
     Cmn.judgeUser(this, this.props.match.params.uid);
+    Api.checkUser(this.props.match.params.uid)
+      .then (res   => this.setState({ isNotFound: false }))
+      .catch(error => this.setState({ isNotFound: true  }))
+      .finally(()  => this.setState({ isChecking: false }));
   }
 
   // --------------------------------------------------------------------------------------
   // Render Methods
   // --------------------------------------------------------------------------------------
   render() {
-    const c = this.props.classes;
     return (
-      <div>
-        <UserInfo
-          user={this.props.user}
-          isLoading={this.props.isLoading}
-          uid={this.props.match.params.uid}
-          isMe={this.state.isMe}
-        />
-        <SiteList uid={this.props.match.params.uid} />
-      </div>
+      this.state.isChecking ?
+        <LoaderBox />
+        :
+        this.state.isNotFound ?
+          <NotFound />
+          :
+          <div>
+            <UserInfo
+              uid={this.props.match.params.uid}
+              isMe={this.state.isMe}
+            />
+            <SiteList uid={this.props.match.params.uid} />
+          </div>
     );
   }
 }

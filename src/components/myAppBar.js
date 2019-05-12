@@ -8,14 +8,11 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 import AccountCircle  from '@material-ui/icons/AccountCircle';
 import AppBar         from '@material-ui/core/AppBar';
+import Avatar         from '@material-ui/core/Avatar';
 import Button         from '@material-ui/core/Button';
-import Menu           from '@material-ui/core/Menu';
-import MenuIcon       from '@material-ui/icons/Menu';
-import MenuItem       from '@material-ui/core/MenuItem';
 import Toolbar        from '@material-ui/core/Toolbar';
 import Typography     from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Avatar         from '@material-ui/core/Avatar';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -37,16 +34,19 @@ class MyAppBar extends React.Component {
     super(props);
     this.state = {
       anchorEl:  null,
-      //user:      null,
-      //isLoading: true,
+      user:      null,
+      isLoading: true,
     };
+  }
 
-    //FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
-    //  this.setState({
-    //    //user:      user,
-    //    isLoading: false,
-    //  });
-    //});
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      user ? this.setState({ user: user }) : this.setState({ user: null });
+      this.setState({ isLoading: false });
+    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ class MyAppBar extends React.Component {
         <Toolbar className={c.toolbar}>
           <SiteTitle c={c} />
 
-          <SignInOut c={c} user={this.props.user} isLoading={this.props.isLoading} />
+          <SignInOut c={c} user={this.state.user} isLoading={this.state.isLoading} />
         </Toolbar>
 
       </AppBar>
@@ -83,12 +83,18 @@ class MyAppBar extends React.Component {
 // -------------------------------------------------------------------------------------------------
 const styles = theme => {
   return ({
-    avatarIcon: {
-      fontSize: 40,
+    signInAvatar: {
+      display: 'inline-table',
+      cursor: 'pointer',
     },
 
-    avatar: {
-      display: 'inline-table',
+    signInNoAvatar: {
+      fontSize: 40,
+      cursor: 'pointer',
+    },
+
+    signOutNoAvatar: {
+      fontSize: 40,
     },
 
     siteTitle: {
@@ -149,16 +155,16 @@ const SignInOut = ({c, user, isLoading}) => {
             <Avatar
               alt={user.displayName}
               src={user.photoURL}
-              className={c.avatar}
+              className={c.signInAvatar}
               component={Link} to={'/users/' + user.uid + '/detail'}
             />
             :
             <NoAvatar 
-              className={c.avatarIcon}
+              className={c.signInNoAvatar}
               component={Link} to={'/users/' + user.uid + '/detail'}
             />
           :
-          <AccountCircle className={c.avatarIcon} />
+          <AccountCircle className={c.signOutNoAvatar} />
       }
 
       <span>

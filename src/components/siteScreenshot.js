@@ -6,14 +6,13 @@ import React from 'react'
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-import Card              from '@material-ui/core/Card';
-import CardMedia         from '@material-ui/core/CardMedia';
-import { withStyles }    from '@material-ui/core/styles';
-import CardActions       from '@material-ui/core/CardActions';
-import Button            from '@material-ui/core/Button';
 import AddPhotoAlternate from '@material-ui/icons/AddPhotoAlternate';
-import Typography        from '@material-ui/core/Typography';
+import Button            from '@material-ui/core/Button';
+import Card              from '@material-ui/core/Card';
+import CardActions       from '@material-ui/core/CardActions';
 import Snackbar          from '@material-ui/core/Snackbar';
+import Typography        from '@material-ui/core/Typography';
+import { withStyles }    from '@material-ui/core/styles';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -24,10 +23,15 @@ import classNames    from 'classnames';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import { Dropzone } from '../lib/common';
-import SiteReaction from './siteReaction';
 import * as Api     from '../lib/api';
 import * as Cmn     from '../lib/common';
+import SiteReaction from './siteReaction';
+import { Dropzone } from '../lib/common';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
+import * as FirebaseAuth from './firebase/firebaseAuth';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -41,14 +45,12 @@ class SiteScreenshot extends React.Component {
       snackMessage: '',
       isLoading:    true,
     };
-
   }
 
   // --------------------------------------------------------------------------------------
   // * Lifecycle Methods
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
-    console.log("run componentDidMount!");
     if (this.props.isRegistration) {
       this.setState({ isLoading: false })
     } else {
@@ -65,27 +67,28 @@ class SiteScreenshot extends React.Component {
   // * Event handlers and Related Methods
   // --------------------------------------------------------------------------------------
   handleUpdate = (data) => {
-    if (this.props.user) {
-      if (this.props.isRegistration) {
-        this.setState({ screenshot: data });
-      } else {
-        this.props.user.getIdToken(true)
-          .then (token => this.updateSiteScreenshot(this.props.siteId, data, token, this.props.user.uid))
-          .catch(error => console.log(error));
-      }
+    if (this.props.isRegistration) {
+      this.setState({ screenshot: data });
+    } else {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) {
+          user.getIdToken(true)
+            .then (token => this.updateSiteScreenshot(this.props.siteId, data, token, user.uid))
+            .catch(error => console.log(error));
+        }
+      });
     }
   }
 
   handleDelete = () => {
-    console.log("run handleDelete!");
-    if (this.props.user) {
-      if (this.props.isRegistration) {
-        this.setState({ screenshot: false });
-      } else {
-        this.props.user.getIdToken(true)
-          .then (token => this.deleteSiteScreenshot(this.props.siteId, token, this.props.user.uid))
+    if (this.props.isRegistration) {
+      this.setState({ screenshot: false });
+    } else {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        user.getIdToken(true)
+          .then (token => this.deleteSiteScreenshot(this.props.siteId, token, user.uid))
           .catch(error => console.log(error));
-      }
+      });
     }
   }
 
@@ -106,8 +109,7 @@ class SiteScreenshot extends React.Component {
           this.setState({ screenshot:   data })
           this.setState({ snackMessage: res.data.message });
         })
-        .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error) }))
-        .finally(()    => this.setState({ snackOpen: true }));
+        .catch  (error => this.setState({ snackMessage: Cmn.getApiError(error), snackOpen: true }));
     }
   }
 
@@ -135,7 +137,6 @@ class SiteScreenshot extends React.Component {
                 onUpdate={data => this.handleUpdate(data)}
                 onDelete={() => this.handleDelete()}
                 siteId={this.props.siteId}
-                user={this.props.user}
                 isRegistration={this.props.isRegistration}
                 isMine={this.props.isMine}
               />
@@ -163,13 +164,10 @@ class SiteScreenshot extends React.Component {
 const styles = theme => {
   return ({
     screenshotCard: {
-      //[theme.breakpoints.down('sm')]: {
-      //  height: '100%',
-      //},
-      //[theme.breakpoints.up('md')]: {
-      //  height: 750,
-      //},
-      height: 'auto',
+      [theme.breakpoints.down('sm')]: {
+        height: 'auto',
+      },
+      height: 750,
     },
 
     pointer: {
@@ -232,16 +230,16 @@ export default withStyles(styles)(SiteScreenshot);
 // --------------------------------------------------------------------------------------
 // Return component functions
 // --------------------------------------------------------------------------------------
-const Screenshot = ({c, dataUrl, onUpdate, onDelete, siteId, user, isRegistration, isMine}) => {
+const Screenshot = ({c, dataUrl, onUpdate, onDelete, siteId, isRegistration, isMine}) => {
   return (
     <React.Fragment>
       <div>
-        <img className={c.screenshot} src={dataUrl} id="screenshot"/>
+        <img alt="screenshot" className={c.screenshot} src={dataUrl} id="screenshot"/>
       </div>
 
       <CardActions className={c.screenshotActions}>
         <div>
-          { isRegistration ? null : <SiteReaction siteId={siteId} user={user} /> }
+          { isRegistration ? null : <SiteReaction siteId={siteId} /> }
         </div>
         { 
           isMine || isRegistration ?

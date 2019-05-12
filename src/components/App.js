@@ -6,8 +6,7 @@ import React from 'react';
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(MaterialUI)
 // -------------------------------------------------------------------------------------------------
-//import { withStyles } from '@material-ui/core/styles';
-import withRoot       from '../withRoot';
+import withRoot from '../withRoot';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Third Party)
@@ -17,27 +16,23 @@ import {
   Route,
   Switch,
   Redirect,
-}                from 'react-router-dom';
-import PropTypes from 'prop-types';
+} from 'react-router-dom';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import About      from './about';
 import MyAppBar   from './myAppBar';
-import SiteList   from './siteList';
-import SiteDetail from './siteDetail';
 import NotFound   from './notFound';
 import SignIn     from './signIn';
+import SiteDetail from './siteDetail';
+import SiteList   from './siteList';
 import UserPage   from './userPage';
-import * as Cmn   from '../lib/common';
+import '../css/common.scss';
 
 // -------------------------------------------------------------------------------------------------
-// * Import Modules(CSS)
+// * Import Modules(Firebase)
 // -------------------------------------------------------------------------------------------------
-//import styles from '../css/style'
-
-import firebase from 'firebase';
+import * as FirebaseAuth from '../components/firebase/firebaseAuth';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -49,18 +44,27 @@ class App extends React.Component {
       user:      null,
       isLoading: true,
     };
-    Cmn.setUser(this);
+  }
+
+  // --------------------------------------------------------------------------------------
+  // * Lifecycle Methods
+  // --------------------------------------------------------------------------------------
+  componentDidMount = () => {
+    FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+      user ? this.setState({ user: user }) : this.setState({ user: null });
+      this.setState({ isLoading: false });
+    });
   }
 
   // --------------------------------------------------------------------------------------
   // Render Methods
   // --------------------------------------------------------------------------------------
   render() {
-    console.log("run render!");
+
     const { user, isLoading } = this.state;
     return (
       <Router>
-        <MyAppBar user={user} isLoading={isLoading} />
+        <MyAppBar />
 
         <Switch>
           <Route exact path="/"
@@ -71,16 +75,16 @@ class App extends React.Component {
 
           <PrivateRoute exact path="/sites/register" 
             user={user} isLoading={isLoading} redirectTo="/sites"
-            render={()      => <SiteDetail user={user} isRegistration={true} />} />
+            render={()      => <SiteDetail isRegistration={true} />} />
 
           <Route exact path="/signin"
             render={()      => <SignIn />} />
 
           <Route exact path="/sites/:siteId/detail" 
-            render={(match) => <SiteDetail {...match} user={user} />} />
+            render={(match) => <SiteDetail {...match} />} />
 
           <Route exact path="/users/:uid/detail" 
-            render={(match) => <UserPage   {...match} user={user} isLoading={isLoading} />} />
+            render={(match) => <UserPage {...match} />} />
 
           <Route component={NotFound} />
         </Switch>

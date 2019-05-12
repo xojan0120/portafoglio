@@ -13,18 +13,21 @@ import { withStyles } from '@material-ui/core/styles';
 // * Import Modules(Third Party)
 // -------------------------------------------------------------------------------------------------
 import PropTypes     from 'prop-types';
-import { Redirect }  from 'react-router-dom';
 
 // -------------------------------------------------------------------------------------------------
 // * Import Modules(Self Made)
 // -------------------------------------------------------------------------------------------------
-import SiteScreenshot from './siteScreenshot';
-import SiteReaction   from './siteReaction';
-import SiteInfo       from './siteInfo';
 import * as Api       from '../lib/api';
 import * as Cmn       from '../lib/common';
-import { LoaderBox }  from '../lib/common';
 import NotFound       from './notFound';
+import SiteInfo       from './siteInfo';
+import SiteScreenshot from './siteScreenshot';
+import { LoaderBox }  from '../lib/common';
+
+// -------------------------------------------------------------------------------------------------
+// * Import Modules(Firebase)
+// -------------------------------------------------------------------------------------------------
+import * as FirebaseAuth from '../components/firebase/firebaseAuth';
 
 // ----------------------------------------------------------------------------------------
 // * Main Class
@@ -37,15 +40,18 @@ class SiteDetail extends React.Component {
       isChecking: true,
       isNotFound: false,
     };
-
-    if (!this.props.isRegistration) Cmn.judgeSite(this, props.match.params.siteId) 
   }
 
   // --------------------------------------------------------------------------------------
   // * Lifecycle Methods
   // --------------------------------------------------------------------------------------
   componentDidMount = () => {
-    console.log("run componentDidMount!");
+    if (!this.props.isRegistration) {
+      FirebaseAuth.getFirebase().auth().onAuthStateChanged(user => {
+        if (user) Cmn.judgeSite(this, this.props.match.params.siteId, user.uid);
+      });
+    }
+
     if (this.props.isRegistration) {
       this.setState({ isChecking: false, isNotFound: false });
     } else {
@@ -59,6 +65,7 @@ class SiteDetail extends React.Component {
   // Render Methods
   // --------------------------------------------------------------------------------------
   render() {
+
     const c = this.props.classes;
     return (
       this.state.isChecking ?
@@ -72,7 +79,6 @@ class SiteDetail extends React.Component {
               <SiteScreenshot
                 siteId={this.props.isRegistration ? null : this.props.match.params.siteId} 
                 isMine={this.state.isMine} 
-                user={this.props.user}
                 isRegistration={this.props.isRegistration}
               />
             </Grid>
@@ -80,7 +86,6 @@ class SiteDetail extends React.Component {
               <SiteInfo 
                 siteId={this.props.isRegistration ? null : this.props.match.params.siteId} 
                 isMine={this.state.isMine} 
-                user={this.props.user}
                 isRegistration={this.props.isRegistration}
               />
             </Grid>
@@ -100,15 +105,12 @@ const styles = theme => {
     },
 
     screenshotGrid: {
-      //height: '80vh',
       [theme.breakpoints.down('sm')]: {
         paddingRight: 0,
         marginBottom: 10,
       },
 
-      [theme.breakpoints.up('md')]: {
-        paddingRight: 20,
-      },
+      paddingRight: 20,
 
       flexBasis: '100%',
     },
